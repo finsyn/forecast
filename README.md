@@ -10,4 +10,7 @@
 ```
 # visualize data
 python visualize.py
+
+# train model
+python forecast.py
 ```

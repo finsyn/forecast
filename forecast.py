@@ -1,6 +1,6 @@
 import numpy as np
 from pandas import read_csv
-from utils import series_to_supervised 
+from parse import get_train_data 
 from keras.models import Input, Model
 from keras.layers import LSTM, Dense, BatchNormalization, Activation, Dropout
 from keras.utils import to_categorical
@@ -8,7 +8,8 @@ from keras.backend import argmax
 from matplotlib import pyplot
 
 dataset = read_csv('omx.csv', header=0, index_col=0)
-values = dataset.values
+data = get_train_data(dataset, target='omxState', n_lags=30)
+values = data.values
 
 # unique values in categorical output column
 state_to_idx = {state: idx for idx, state in enumerate(list(set(values[:,-1])))}
@@ -17,16 +18,7 @@ n_output = len(state_to_idx)
 # replace output column with index values
 values[:,-1] = [state_to_idx[x] for x in values[:,-1]]
 
-# frame as supervised learning
-# with one time shift since we want to predict the following day
-reframed = series_to_supervised(values, 30, 1)
-
-# drop shifted columns we don't want to predict
-# @TODO we currently feed in shifted label value as well
-# reframed.drop(reframed.columns[[5,6]], axis=1, inplace=True)
-
 # split into train and test sets
-values = reframed.values
 n_train = int(values.shape[0] * 0.8) 
 train = values[:n_train, :]
 test = values[n_train:, :]
