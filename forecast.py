@@ -6,9 +6,10 @@ from keras.layers import LSTM, Dense, BatchNormalization, Activation, Dropout
 from keras.utils import to_categorical
 from keras.backend import argmax
 from matplotlib import pyplot
+from sklearn import preprocessing
 
-dataset = read_csv('omx.csv', header=0, index_col=0)
-data = get_train_data(dataset, target='omxState', n_lags=30)
+dataset = read_csv('omx-v002.csv', header=0, index_col=0)
+data = get_train_data(dataset, target='omxState', n_lags=5)
 values = data.values
 
 # unique values in categorical output column
@@ -26,6 +27,11 @@ test = values[n_train:, :]
 # split into input and outputs
 train_X, train_y = train[:, :-1], train[:, -1]
 test_X, test_y = test[:, :-1], test[:, -1]
+
+# normalize input
+min_max_scaler = preprocessing.MinMaxScaler()
+train_X = min_max_scaler.fit_transform(train_X)
+test_X  = min_max_scaler.fit_transform(test_X)
 
 # reshape input to be 3D [samples, timesteps, features]
 train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
@@ -66,8 +72,15 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y_oh,
-        epochs=1000, batch_size=32,
-        shuffle=False)
+        epochs=1000, batch_size=16,
+        validation_data=(test_X, test_y_oh),
+        shuffle=True)
 
 result = model.evaluate(test_X, test_y_oh, verbose=0)
 print('Test set accuracy: %s' % result[1])
+
+# plot history
+pyplot.plot(history.history['loss'], label='train')
+pyplot.plot(history.history['val_loss'], label='test')
+pyplot.legend()
+pyplot.show()
