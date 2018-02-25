@@ -6,6 +6,7 @@ values = dataset.values
 
 groups = list(range(7))
 i = 1
+
 # plot each column
 pyplot.figure()
 for group in groups:
@@ -13,4 +14,5 @@ for group in groups:
 	pyplot.plot(values[:, group])
 	pyplot.title(dataset.columns[group], y=0.5, loc='right')
 	i += 1
+
 pyplot.show()
