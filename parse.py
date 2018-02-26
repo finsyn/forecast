@@ -36,7 +36,11 @@ def get_train_data (data, target, n_lags=1, n_pred_steps=1):
     # put it all together
     agg = concat(cols, axis=1)
     agg.columns = names
+    print(agg.shape)
+    # interpolate some null values
+    agg.interpolate(inplace=True)
     # drop rows with NaN values
     agg.dropna(inplace=True)
+    print(agg.shape)
 
     return agg

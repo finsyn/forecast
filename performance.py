@@ -1,6 +1,6 @@
 import numpy as np
 
-def confident_precision (probabilities, correct, confidence=0.8):
+def confident_precision (probabilities, correct, confidence=0.9):
     n_samples, n_features = probabilities.shape
 
     confident = np.dot(

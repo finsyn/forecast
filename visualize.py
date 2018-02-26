@@ -1,10 +1,10 @@
 from pandas import read_csv
 from matplotlib import pyplot
 # load dataset
-dataset = read_csv('omx-v002.csv', header=0, index_col=0)
+dataset = read_csv('omx-v006.csv', header=0, index_col=0)
 values = dataset.values
 
-groups = list(range(7))
+groups = list(range(10))
 i = 1
 
 # plot each column

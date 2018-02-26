@@ -1,6 +1,6 @@
 import numpy as np
 from pandas import read_csv
-
+from scipy import signal
 from performance import confident_precision
 from parse import get_train_data 
 
@@ -14,8 +14,8 @@ from matplotlib import pyplot
 from sklearn import preprocessing
 from sklearn.metrics import average_precision_score
 
-dataset = read_csv('omx-v004.csv', header=0, index_col=0)
-data = get_train_data(dataset, target='omxState', n_lags=3)
+dataset = read_csv('omx-v008.csv', header=0, index_col=0)
+data = get_train_data(dataset, target='omxState', n_lags=2)
 values = data.values
 
 # unique values in categorical output column
@@ -25,18 +25,20 @@ n_output = len(state_to_idx)
 # replace output column with index values
 values[:,-1] = [state_to_idx[x] for x in values[:,-1]]
 
+# normalize input
+# min_max_scaler = preprocessing.MinMaxScaler()
+# values[:,:-1] = min_max_scaler.fit_transform(values[:,:-1])
+# values[:,:-1] = signal.detrend(values[:,:-1])
+values[:,:-1] = preprocessing.scale(values[:,:-1])
+
 # split into train and test sets
-n_train = int(values.shape[0] * 0.8) 
+n_train = int(values.shape[0] * 0.7) 
 train = values[:n_train, :]
 test = values[n_train:, :]
+
 # split into input and outputs
 train_X, train_y = train[:, :-1], train[:, -1]
 test_X, test_y = test[:, :-1], test[:, -1]
-
-# normalize input
-min_max_scaler = preprocessing.MinMaxScaler()
-train_X = min_max_scaler.fit_transform(train_X)
-test_X  = min_max_scaler.fit_transform(test_X)
 
 # reshape input to be 3D [samples, timesteps, features]
 train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
@@ -54,7 +56,7 @@ def omxmodel (n_inputs, n_features, n_values):
     # X = Dropout(0.5)(X)
     X = LSTM(64)(inputs)
     X = Dense(n_features)(X)
-    X = Dropout(0.2)(X)
+    X = Dropout(0.8)(X)
     predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -78,7 +80,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y_oh,
-        epochs=250, batch_size=32,
+        epochs=200, batch_size=16,
         validation_data=(test_X, test_y_oh),
         shuffle=False)
 
@@ -92,8 +94,12 @@ correct_confident, predicted_confident = confident_precision(test_output, test_y
 precision_avg = average_precision_score(test_y_oh, test_output)
 accuracy_confident = np.sum(correct_confident == predicted_confident)/correct_confident.shape[0]
 print(state_to_idx)
+print('Test set all:')
 print(test_y)
 print(predictions)
+print('Test set confident:')
+print(correct_confident)
+print(predicted_confident)
 
 print('Test set average precision: %s'   % precision_avg) 
 print('Test set confident accuracy: %s' % accuracy_confident)
