@@ -32,7 +32,7 @@ values = data.values
 values[:,:-1] = preprocessing.scale(values[:,:-1])
 
 # split into train and test sets
-n_train = int(values.shape[0] * 0.7) 
+n_train = int(values.shape[0] * 0.8) 
 train = values[:n_train, :]
 test = values[n_train:, :]
 
@@ -57,7 +57,7 @@ def omxmodel (n_inputs, n_features, n_values):
     X = LSTM(64)(inputs)
     X = Dense(n_features)(X)
     X = Dropout(0.2)(X)
-    predictions = Dense(n_values, activation='tanh')(X)
+    predictions = Dense(n_values)(X)
 
     model = Model(inputs=inputs, outputs=predictions)
 
@@ -76,7 +76,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y,
-        epochs=200, batch_size=16,
+        epochs=500, batch_size=16,
         validation_data=(test_X, test_y),
         shuffle=False)
 
@@ -84,18 +84,23 @@ history = model.fit(
 result = model.evaluate(test_X, test_y, verbose=0)
 print('Test set mean absolute error: %s' % result[1])
 
-test_output = model.predict(test_X)
-predictions = test_output
-
-print('Test set all:')
-print(test_y)
-print(predictions.reshape(len(test_y)))
-
 # save model
 model.save('model.h5')
 
 # plot history
+pyplot.figure()
+pyplot.subplot(2, 1, 1)
 pyplot.plot(history.history['loss'], label='train')
 pyplot.plot(history.history['val_loss'], label='test')
 pyplot.legend()
+
+test_output = model.predict(test_X)
+pred = test_output.reshape(len(test_y))
+
+print('Test set all:')
+print(np.around(test_y, 1))
+print(np.around(pred, 1))
+
+pyplot.subplot(2, 1, 2)
+pyplot.plot(range(len(pred)), test_y, 'r', pred, 'b')
 pyplot.show()
