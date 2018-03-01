@@ -1,8 +1,9 @@
 import numpy as np
+import sys
 from pandas import read_csv
 from scipy import signal
 from performance import confident_precision
-from parse import get_train_data 
+from parse import get_train_data
 
 from keras.models import Input, Model
 from keras.layers import LSTM, Dense, BatchNormalization, Activation, Dropout
@@ -14,21 +15,12 @@ from matplotlib import pyplot
 from sklearn import preprocessing
 from sklearn.metrics import average_precision_score
 
+n_lags = 9 
 dataset = read_csv('omx-no-label.csv', header=0, index_col=0)
-data = get_train_data(dataset, target='omxPercentChange', n_lags=2)
+data = get_train_data(dataset, target='nordeaChange', n_lags=n_lags)
 values = data.values
 
-# unique values in categorical output column
-# state_to_idx = {state: idx for idx, state in enumerate(list(set(values[:,-1])))}
-# n_output = len(state_to_idx)
-
-# replace output column with index values
-# values[:,-1] = [state_to_idx[x] for x in values[:,-1]]
-
-# normalize input
-# min_max_scaler = preprocessing.MinMaxScaler()
-# values[:,:-1] = min_max_scaler.fit_transform(values[:,:-1])
-# values[:,:-1] = signal.detrend(values[:,:-1])
+# normalize per feature
 values[:,:-1] = preprocessing.scale(values[:,:-1])
 
 # split into train and test sets
@@ -56,7 +48,7 @@ def omxmodel (n_inputs, n_features, n_values):
     # X = Dropout(0.5)(X)
     X = LSTM(64)(inputs)
     X = Dense(n_features)(X)
-    X = Dropout(0.2)(X)
+    X = Dropout(0.4)(X)
     predictions = Dense(n_values)(X)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -76,7 +68,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y,
-        epochs=500, batch_size=16,
+        epochs=5000, batch_size=32,
         validation_data=(test_X, test_y),
         shuffle=False)
 

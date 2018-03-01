@@ -8,8 +8,6 @@ def get_train_data (data, target, n_lags=1, n_pred_steps=1):
     is_feature_col = lambda col: col != target
     features = list(filter(is_feature_col, df.columns.values))
 
-    n_vars = df.shape[1] - 1
-
     def col_name_to_idx (name): 
         return list(df.columns.values).index(target)
 
