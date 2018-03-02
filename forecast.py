@@ -15,11 +15,12 @@ from matplotlib import pyplot
 from sklearn import preprocessing
 from sklearn.metrics import average_precision_score
 
-n_lags = 9 
-dataset = read_csv('omx-no-label.csv', header=0, index_col=0)
-data = get_train_data(dataset, target='nordeaChange', n_lags=n_lags)
+n_lags = 9
+dataset = read_csv('results/weekly.csv', header=0, index_col=0)
+data = get_train_data(dataset, target='market-index_OMX30-weekClose', n_lags=n_lags)
 values = data.values
 
+print(values[:,:-1])
 # normalize per feature
 values[:,:-1] = preprocessing.scale(values[:,:-1])
 
@@ -68,7 +69,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y,
-        epochs=5000, batch_size=32,
+        epochs=300, batch_size=32,
         validation_data=(test_X, test_y),
         shuffle=False)
 
@@ -88,6 +89,12 @@ pyplot.legend()
 
 test_output = model.predict(test_X)
 pred = test_output.reshape(len(test_y))
+
+# save test output for simulations etc.
+np.savetxt(
+        "results/test-output.csv",
+        np.asarray([ pred, test_y ]),
+        delimiter=",")
 
 print('Test set all:')
 print(np.around(test_y, 1))

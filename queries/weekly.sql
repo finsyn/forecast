@@ -1,5 +1,5 @@
 SELECT
-  FORMAT_TIMESTAMP('%Y-%V', TIMESTAMP_TRUNC(date, WEEK(MONDAY)), 'Europe/Stockholm') AS week,
+  FORMAT_TIMESTAMP('%Y-%V', TIMESTAMP_TRUNC(date, WEEK(MONDAY)), 'Europe/Stockholm') AS date,
   service_id as id,
   (weekClose - weekOpen)/weekOpen * 100 as weekChange,
   sum(volume) as weekVolume
