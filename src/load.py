@@ -1,4 +1,4 @@
-from pandas import read_csv, concat, to_datetime
+from pandas import datetime, date_range, read_csv, concat, to_datetime
 
 def load_quotes_daily(csvfile):
     df = read_csv(csvfile, header=0, index_col=0)
@@ -38,13 +38,28 @@ def load_insiders(csvfile):
     df.index = to_datetime(df.index)
     return df
 
+def load_shorts(csvfile):
+    df = read_csv(csvfile, header=0, index_col=0)
+    print('loading short net percent points change for %s days' % len(df))
+    df.index = to_datetime(df.index)
+    df = df.interpolate(axis=1)
+    return df
+
+
 def load_features():
     quotesfile = 'data/quotes.csv'
     insidersfile = 'data/insiders.csv'
+    shortsfile = 'data/shorts.csv'
     df_quotes = load_quotes_daily(quotesfile)
     df_insiders = load_insiders(insidersfile)
-    # df_weekly = load_quotes_weekly(quotesfile)
-    # limit time scope
-    # agg = agg.ix['2009-01-01':]
-    df = concat([df_quotes, df_insiders], axis=1, join='inner')
+    df_shorts = load_shorts(shortsfile)
+
+    # period of interest
+    start = datetime(2017, 7, 1)
+    end = datetime(2018, 1, 1)
+    index = date_range(start, end)
+
+    df = concat([df_quotes, df_insiders, df_shorts], axis=1, join='outer')
+    df.fillna(0.0, axis=1, inplace=True)
+    df = df.reindex(index, fill_value=0.0)
     return df
