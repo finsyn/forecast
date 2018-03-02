@@ -15,7 +15,7 @@ from matplotlib import pyplot
 from sklearn import preprocessing
 from sklearn.metrics import average_precision_score
 
-n_lags = 4
+n_lags = 9
 dataset = read_csv('data/training.csv', header=0, index_col=0)
 data = get_train_data(dataset, target='market-index_OMX30-change', n_lags=n_lags)
 values = data.values
@@ -69,7 +69,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y,
-        epochs=300, batch_size=32,
+        epochs=500, batch_size=32,
         validation_data=(test_X, test_y),
         shuffle=False)
 
