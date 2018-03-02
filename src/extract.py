@@ -17,5 +17,8 @@ def query(filename):
             index_col='date',
             dialect='standard')
 
-quotes = query('queries/quotes.sql')
-quotes.to_csv('results/quotes.csv')
+# quotes = query('queries/quotes.sql')
+# quotes.to_csv('data/quotes.csv')
+
+insiders = query('queries/insiders.sql')
+insiders.to_csv('data/insiders.csv')

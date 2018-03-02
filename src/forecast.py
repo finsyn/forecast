@@ -15,9 +15,9 @@ from matplotlib import pyplot
 from sklearn import preprocessing
 from sklearn.metrics import average_precision_score
 
-n_lags = 9
-dataset = read_csv('results/weekly.csv', header=0, index_col=0)
-data = get_train_data(dataset, target='market-index_OMX30-weekClose', n_lags=n_lags)
+n_lags = 4
+dataset = read_csv('data/training.csv', header=0, index_col=0)
+data = get_train_data(dataset, target='market-index_OMX30-change', n_lags=n_lags)
 values = data.values
 
 print(values[:,:-1])
@@ -47,7 +47,7 @@ def omxmodel (n_inputs, n_features, n_values):
     # X = LSTM(64, return_sequences=True)(inputs)
     # X = Dense(n_features)(X)
     # X = Dropout(0.5)(X)
-    X = LSTM(64)(inputs)
+    X = LSTM(128)(inputs)
     X = Dense(n_features)(X)
     X = Dropout(0.4)(X)
     predictions = Dense(n_values)(X)
@@ -92,13 +92,13 @@ pred = test_output.reshape(len(test_y))
 
 # save test output for simulations etc.
 np.savetxt(
-        "results/test-output.csv",
+        "data/test-output.csv",
         np.asarray([ pred, test_y ]),
         delimiter=",")
 
 print('Test set all:')
-print(np.around(test_y, 1))
-print(np.around(pred, 1))
+print(test_y)
+print(pred)
 
 pyplot.subplot(2, 1, 2)
 pyplot.plot(range(len(pred)), test_y, 'r', pred, 'b')
