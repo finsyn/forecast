@@ -19,7 +19,8 @@ def load_quotes_daily(csvfile):
 
         # get relative change
         curr['change'] = (curr['close'] - curr['open']) / curr['open']
-        curr = curr.drop(['close', 'open'], axis=1)
+        curr['mid'] = (curr['high'] - curr['low'])
+        curr = curr.drop(['close', 'open', 'high', 'low'], axis=1)
         cols.append(curr)
         names += [('%s-%s' % (feature, col_name)) for col_name in curr.columns.values]
 
@@ -55,7 +56,7 @@ def load_features():
     df_shorts = load_shorts(shortsfile)
 
     # period of interest
-    start = datetime(2017, 7, 1)
+    start = datetime(2017, 8, 17)
     end = datetime(2018, 1, 1)
     index = date_range(start, end)
 

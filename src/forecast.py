@@ -15,12 +15,18 @@ from matplotlib import pyplot
 from sklearn import preprocessing
 from sklearn.metrics import average_precision_score
 
-n_lags = 9
+
 dataset = read_csv('data/training.csv', header=0, index_col=0)
+
+n_features = dataset.shape[1] - 1
+n_lags = 30
+
+print('n_features: %s ' % n_features)
+print('n_lags: %s ' % n_lags)
+
 data = get_train_data(dataset, target='market-index_OMX30-change', n_lags=n_lags)
 values = data.values
 
-print(values[:,:-1])
 # normalize per feature
 values[:,:-1] = preprocessing.scale(values[:,:-1])
 
@@ -34,20 +40,18 @@ train_X, train_y = train[:, :-1], train[:, -1]
 test_X, test_y = test[:, :-1], test[:, -1]
 
 # reshape input to be 3D [samples, timesteps, features]
-train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
-test_X = test_X.reshape((test_X.shape[0], 1, test_X.shape[1]))
+train_X = train_X.reshape((train_X.shape[0], n_lags, n_features))
+test_X = test_X.reshape((test_X.shape[0], n_lags, n_features))
 
 print(train_X[0,:])
 print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
 def omxmodel (n_inputs, n_features, n_values):
 
+    print(n_inputs)
     inputs = Input(shape=(n_inputs, n_features))
 
-    # X = LSTM(64, return_sequences=True)(inputs)
-    # X = Dense(n_features)(X)
-    # X = Dropout(0.5)(X)
-    X = LSTM(128)(inputs)
+    X = LSTM(256)(inputs)
     X = Dense(n_features)(X)
     X = Dropout(0.4)(X)
     predictions = Dense(n_values)(X)
