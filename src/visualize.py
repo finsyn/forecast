@@ -1,11 +1,10 @@
 from pandas import read_csv
 from matplotlib import pyplot
 # load dataset
-df = read_csv('weekly.csv', header=0, index_col=0)
-omx30 = df.loc[df['id'] == 'market-index_OMX30']
-values = omx30.values
+df = read_csv('data/training.csv', header=0, index_col=0)
+values = df.values
 
-groups = list(range(1,2))
+groups = list(range(0,24))
 i = 1
 
 # plot each column
