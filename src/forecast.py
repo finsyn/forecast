@@ -20,9 +20,9 @@ from sklearn.metrics import average_precision_score, precision_recall_curve, con
 dataset = read_csv('data/training.csv', header=0, index_col=0)
 
 n_features = dataset.shape[1]
-n_lags = 30
+n_lags = 40 
 n_output = 2
-n_epochs = 100
+n_epochs = 150
 train_split = 0.8
 target = 'market-index_OMX30-c_2_o'
 SINGLE_ATTENTION_VECTOR = False
@@ -75,18 +75,18 @@ def omxmodel (n_inputs, n_features, n_values):
 
     inputs = Input(shape=(n_inputs, n_features))
 
-    lstm_out = LSTM(128, return_sequences=True)(inputs)
+    X = LSTM(128, return_sequences=True)(inputs)
     # attention_mul = attention_3d_block(lstm_out)
     # attention_mul = Flatten()(attention_mul)
-    lstm_out_2 = LSTM(128)(lstm_out)
+    X = LSTM(128)(X)
     # X = Dense(128)(attention_mul)
     # X = Dropout(0.5)(X)
     # X = LSTM(256)(X)
     # X = Dense(n_features)(lstm_out)
-    attention_mul = Dropout(0.5)(lstm_out_2)
+    X = Dropout(0.5)(X)
     # regression or classification?
     # predictions = Dense(n_values)(attention_mul)
-    predictions = Dense(n_values, activation='softmax')(attention_mul)
+    predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
 
@@ -146,6 +146,6 @@ np.savetxt(
 print('Test set all:')
 print(test_y.astype(int))
 print(test_y_pred)
-print(np.amax(test_y_prob))
+print(np.amax(test_y_prob*10,axis=1).astype(int))
 
 pyplot.show()
