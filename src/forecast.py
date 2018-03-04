@@ -16,7 +16,6 @@ from matplotlib import pyplot
 from sklearn import preprocessing
 from sklearn.metrics import average_precision_score, precision_recall_curve, confusion_matrix
 
-
 dataset = read_csv('data/training.csv', header=0, index_col=0)
 
 n_features = dataset.shape[1]
@@ -58,34 +57,14 @@ test_X = test_X.reshape((test_X.shape[0], n_lags, n_features))
 
 print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
-def attention_3d_block(inputs):
-    # inputs.shape = (batch_size, time_steps, input_dim)
-    input_dim = int(inputs.shape[2])
-    a = Permute((2, 1))(inputs)
-    a = Reshape((input_dim, n_lags))(a) # this line is not useful. It's just to know which dimension is what.
-    a = Dense(n_lags, activation='softmax')(a)
-    if SINGLE_ATTENTION_VECTOR:
-        a = Lambda(lambda x: K.mean(x, axis=1), name='dim_reduction')(a)
-        a = RepeatVector(input_dim)(a)
-    a_probs = Permute((2, 1), name='attention_vec')(a)
-    output_attention_mul = merge([inputs, a_probs], name='attention_mul', mode='mul')
-    return output_attention_mul
-
 def omxmodel (n_inputs, n_features, n_values):
 
     inputs = Input(shape=(n_inputs, n_features))
 
     X = LSTM(128, return_sequences=True)(inputs)
-    # attention_mul = attention_3d_block(lstm_out)
-    # attention_mul = Flatten()(attention_mul)
-    X = LSTM(128)(X)
-    # X = Dense(128)(attention_mul)
-    # X = Dropout(0.5)(X)
-    # X = LSTM(256)(X)
-    # X = Dense(n_features)(lstm_out)
     X = Dropout(0.5)(X)
-    # regression or classification?
-    # predictions = Dense(n_values)(attention_mul)
+    X = LSTM(128)(X)
+    X = Dropout(0.5)(X)
     predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
