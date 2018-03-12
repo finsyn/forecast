@@ -19,10 +19,10 @@ from sklearn.metrics import average_precision_score, precision_recall_curve, con
 dataset = read_csv('data/training.csv', header=0, index_col=0)
 
 n_features = dataset.shape[1]
-n_lags = 40 
+n_lags = 9
 n_output = 2
-n_epochs = 150
-train_split = 0.8
+n_epochs = 100
+train_split = 0.7
 target = 'market-index_OMX30-c_2_o'
 SINGLE_ATTENTION_VECTOR = False
 
@@ -122,9 +122,14 @@ np.savetxt(
         np.asarray([ test_y_pred, test_y ]),
         delimiter=",")
 
+confidence = np.amax(test_y_prob*10,axis=1).astype(int)
+test_y_conf_pred = test_y_pred[confidence > 8]
+test_y_conf_real = test_y[confidence > 8]
+acc_confident = np.sum(test_y_conf_pred == test_y_conf_real) / len(test_y_conf_pred)
 print('Test set all:')
 print(test_y.astype(int))
 print(test_y_pred)
-print(np.amax(test_y_prob*10,axis=1).astype(int))
+print(confidence)
+print('Test set confident accuracy: %s' % acc_confident)
 
 pyplot.show()
