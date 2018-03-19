@@ -1,14 +1,13 @@
 SELECT
   DISTINCT TIMESTAMP_TRUNC(published_at, DAY) AS date,
-  SUM(CAST(REPLACE(REPLACE(transaction_type, 'Avyttring', '1'), 'Förvärv', '0') AS INT64) * volume * price) AS sell,
-  SUM(CAST(REPLACE(REPLACE(transaction_type, 'Förvärv', '1'), 'Avyttring', '0') AS INT64) * volume * price) AS buy,
-  sector as id
+  SUM(CAST(REPLACE(REPLACE(transaction_type, 'Avyttring', '1'), 'Förvärv', '0') AS INT64)) AS sell,
+  SUM(CAST(REPLACE(REPLACE(transaction_type, 'Förvärv', '1'), 'Avyttring', '0') AS INT64)) AS buy,
+  'all' as id
 FROM
   `insikt-e1887.notifications.transactions` transactions
 INNER JOIN
   (
     SELECT service_id, sector FROM `insikt-e1887.notifications.shares`
-    WHERE listing_nasdaq = 'nordic-large-cap'
   ) shares 
   ON shares.service_id = transactions.service_id
 WHERE transaction_type IN ('Avyttring', 'Förvärv')
