@@ -16,7 +16,7 @@ FROM
     first_value(high) over (partition by service_id, TIMESTAMP_TRUNC(date, DAY) order by created_at desc) as newestHigh,
     first_value(low) over (partition by service_id, TIMESTAMP_TRUNC(date, DAY) order by created_at desc) as newestLow,
     *
-    FROM `notifications.quotes_training`
+    FROM `notifications.quotes`
 ) quotes
 LEFT JOIN `notifications.shares` as shares on shares.service_id = quotes.service_id
 WHERE

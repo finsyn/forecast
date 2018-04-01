@@ -20,8 +20,8 @@ def query(filename):
 quotes = query('queries/quotes.sql')
 quotes.to_csv('data/quotes.csv')
 
-# insiders = query('queries/insiders.sql')
-# insiders.to_csv('data/insiders.csv')
+insiders = query('queries/insiders.sql')
+insiders.to_csv('data/insiders.csv')
 
 # shorts = query('queries/shorts.sql')
 # shorts.to_csv('data/shorts.csv')

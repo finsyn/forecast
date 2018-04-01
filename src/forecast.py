@@ -5,6 +5,8 @@ from scipy.stats import binom_test
 from performance import confident_precision
 from parse import get_train_data
 
+np.random.seed(1337)
+
 from keras.models import Input, Model
 from keras.layers import LSTM, Dense, BatchNormalization, Activation, Dropout, Embedding, merge
 from keras.layers.core import *
@@ -20,12 +22,11 @@ from sklearn.metrics import average_precision_score, precision_recall_curve, con
 dataset = read_csv('data/training.csv', header=0, index_col=0)
 
 n_features = dataset.shape[1]
-n_lags = 30
+n_lags = 3 
 n_output = 2
-n_epochs = 1500
+n_epochs = 800
 train_split = 0.8
 target = 'market-index_OMX30-c_2_o'
-SINGLE_ATTENTION_VECTOR = False
 
 print('n_features: %s ' % n_features)
 print('n_lags: %s ' % n_lags)
@@ -36,9 +37,6 @@ values = data.values
 
 X = values[:,:-1]
 Y = values[:,-1]
-
-# normalize per feature
-X = preprocessing.scale(X)
 
 # make target column boolean
 Y = Y > 0.0
@@ -62,10 +60,12 @@ def omxmodel (n_inputs, n_features, n_values):
 
     inputs = Input(shape=(n_inputs, n_features))
 
-    X = LSTM(16, return_sequences=True)(inputs)
-    X = Dropout(0.5)(X)
-    X = LSTM(16)(X)
-    X = Dropout(0.5)(X)
+    # X = LSTM(6, return_sequences=True)(inputs)
+    # X = Dropout(0.5)(X)
+    X = LSTM(4)(inputs)
+    X = Dropout(0.8)(X)
+    # X = Dense(units=2, activation='relu')(X)
+    # X = Dropout(0.5)(X)
     predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -76,7 +76,7 @@ def omxmodel (n_inputs, n_features, n_values):
 train_y_oh = to_categorical(train_y, num_classes=n_output)
 test_y_oh  = to_categorical(test_y , num_classes=n_output)
 
-model = omxmodel(train_X.shape[1], n_features, n_output)
+model = omxmodel(n_lags, n_features, n_output)
 
 print(model.summary())
 
@@ -114,8 +114,10 @@ print('Test set average precision score: %s' % avg_precision)
 # get actual predictions
 test_y_pred = np.argmax(test_y_prob, axis=-1) 
 
-print('confusion matrix:')
+print('Test set confusion matrix:')
 print(confusion_matrix(test_y, test_y_pred))
+print('Test set p-value:')
+print(binom_test(np.sum(test_y == test_y_pred), len(test_y)))
 
 # save test output for simulations etc.
 np.savetxt(

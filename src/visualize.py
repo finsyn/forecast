@@ -1,17 +1,18 @@
 from pandas import read_csv
 from matplotlib import pyplot
+from pandas.plotting import autocorrelation_plot
 import numpy as np
 import re
 # load dataset
 df = read_csv('data/training.csv', header=0, index_col=0)
 # change this to filter out what columns in the data to show
-cols = list(filter(lambda x: re.search('market', x), df.columns))
-# cols = df.columns
+# cols = list(filter(lambda x: re.search('market', x), df.columns))
+cols = df.columns
 print(cols)
 values = df[cols].values
 
-n_plots_max = 12
-n_plots = np.clip(values.shape[1]-1, 0, n_plots_max)
+n_plots_max = 16
+n_plots = np.clip(values.shape[1], 0, n_plots_max)
 groups = list(range(0,n_plots))
 i = 1
 
