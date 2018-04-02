@@ -1,11 +1,11 @@
 SELECT
   TIMESTAMP_TRUNC(date, DAY) AS date,
   quotes.service_id as id,
-  quotes.newestClose as close,
-  quotes.newestOpen as open,
-  quotes.newestHigh as high,
-  quotes.newestLow as low,
-  quotes.newestVolume as volume
+  quotes.newestClose as c,
+  quotes.newestOpen as o,
+  quotes.newestHigh as h,
+  quotes.newestLow as l,
+  quotes.newestVolume as v
 FROM
 (
   SELECT
@@ -25,14 +25,16 @@ AND
 (
   quotes.service_id LIKE 'market-index_%'
 )
+AND
+  date > TIMESTAMP "2016-01-01"
 GROUP BY
   date,
   id,
-  open,
-  close,
-  low,
-  high,
-  volume
+  o,
+  c,
+  l,
+  h,
+  v
 ORDER BY
   date asc,
   id 

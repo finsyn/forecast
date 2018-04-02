@@ -2,3 +2,4 @@ __pycache__/
 *.csv
 *.h5
 src/*.pyc
+scaler.save

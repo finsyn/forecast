@@ -2,19 +2,22 @@ from pandas import isnull, datetime, date_range, read_csv, concat, to_datetime, 
 import re
 import numpy as np
 from sklearn import preprocessing
+from sklearn.externals import joblib
 
 # open, close -> return
 ret = lambda x,y: np.log(y/x) #Log return 
 scale = lambda x: x/x.max()
 
-def load_quotes_daily(csvfile):
+def read_data_csv(csvfile):
     df = read_csv(
             csvfile,
             header=0,
-            index_col=0,
-            names=['date', 'id', 'c', 'o','h','l','v'] 
+            index_col=0
             )
     df.index = to_datetime(df.index,format='%Y-%m-%d') # Set the indix to a datetime
+    return df
+
+def load_quotes_daily(df):
     securities = list(set(df['id'].values))
 
     # securities = ['market-index_OMX30', 'market-index_VIX']
@@ -28,6 +31,7 @@ def load_quotes_daily(csvfile):
         o = DataFrame()
         if (s_id == 'market-index_OMX30'):
             o['c'] = c.c
+            o['l_2_h'] = ret(c.l,c.h)
         if (s_id == 'market-index_SP500'):
             o['v'] = c.v
         if (s_id != 'market-index_XLRE'):
@@ -39,8 +43,7 @@ def load_quotes_daily(csvfile):
     agg.columns = names
 
     agg.index.name = 'date'
-
-    return agg
+    return agg 
 
 def load_insiders(csvfile):
     df = read_csv(csvfile, header=0, index_col=0)
@@ -92,25 +95,24 @@ def load_shorts(csvfile):
 
     return agg
 
+def add_calendar_events(df):
+    # a column for market opening awareness 
+    df['isMonday'] = (df.index.weekday == 0).astype(int)
+    df['isFriday'] = (df.index.weekday == 4).astype(int)
 
 def load_features():
-    quotesfile = 'data/quotes.csv'
-    insidersfile = 'data/insiders.csv'
-    shortsfile = 'data/shorts.csv'
-    
-    df_quotes = load_quotes_daily(quotesfile)
-    df_insiders = load_insiders(insidersfile)
-    df_shorts = load_shorts(shortsfile)
+    df_quotes_raw = read_data_csv('data/quotes.csv')
+   
+    df_quotes = load_quotes_daily(df_quotes_raw)
+   
+    df = concat([df_quotes], axis=1, join='outer')
 
     # period of interest
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
     start = datetime(2016, 10, 4)
     end = datetime(2018, 3, 30)
-    index = date_range(start, end)
-    
-    df = concat([df_quotes], axis=1, join='outer')
-
-    df = df.reindex(index)
+    index_range = date_range(start, end)
+    df.reindex(index_range)
 
     # remove dates when STO is closed
     df = df.loc[df['market-index_OMX30-c'] > 0]
@@ -120,11 +122,8 @@ def load_features():
 
     scaler = preprocessing.MinMaxScaler()
     df = DataFrame(scaler.fit_transform(df), columns=df.columns, index=df.index)
+    joblib.dump(scaler, 'scaler.save')
     df['market-index_OMX30-c_2_o'] = df_quotes['market-index_OMX30-c_2_o']
 
-    # a column for market opening awareness 
-    df['isMonday'] = (df.index.weekday == 0).astype(int)
-    df['isFriday'] = (df.index.weekday == 4).astype(int)
-
-    print(df.corr())
+    add_calendar_events(df)
     return df
