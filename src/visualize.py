@@ -11,7 +11,7 @@ cols = df.columns
 print(cols)
 values = df[cols].values
 
-n_plots_max = 16
+n_plots_max = 50 
 n_plots = np.clip(values.shape[1], 0, n_plots_max)
 groups = list(range(0,n_plots))
 i = 1

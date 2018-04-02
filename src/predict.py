@@ -1,28 +1,36 @@
-from pandas import isnull, datetime, date_range, read_csv, concat, to_datetime, DataFrame
+from pandas import datetime, date_range, offsets
 from extract import query
 from load import load_quotes_daily, add_calendar_events
 from sklearn.externals import joblib
 import numpy as np
 from keras.models import load_model
+from datetime import datetime, timedelta 
+from sweholidays import get_trading_close_holidays
 
-quotes_df_raw = query('queries/quotes.sql')
+quotes_df_raw = query('queries/indexes.sql')
 quotes_df = load_quotes_daily(quotes_df_raw)
 
+n_lags = 254 
+
 # remove dates when STO is closed
-df = quotes_df.loc[quotes_df['market-index_OMX30-c'] > 0]
-df.drop(columns=['market-index_OMX30-c'], inplace=True)
+index_range = date_range(
+            end=datetime.now().date(),
+            periods=n_lags,
+            freq=offsets.BDay(),
+            holidays=get_trading_close_holidays(2018)
+            )
+
+df = quotes_df.reindex(index_range)
 
 df = df.interpolate()
-df = df.tail(3)
+df = df.tail(n_lags)
 
-scaler = joblib.load('scaler.save') 
-df = DataFrame(scaler.transform(df), columns=df.columns, index=df.index)
-
+df['target'] = df['market-index_OMX30-up']
 add_calendar_events(df)
 
 print(df)
 model = load_model('model.h5')
-sample = df.values.reshape((1, 3, 22))
+sample = df.values.reshape((1, n_lags, len(df.columns)))
 print(sample)
 pred_probs = model.predict(sample)
 pred_prob = np.amax(pred_probs)

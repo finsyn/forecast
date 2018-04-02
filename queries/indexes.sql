@@ -26,7 +26,7 @@ AND
   quotes.service_id LIKE 'market-index_%'
 )
 AND
-  date > TIMESTAMP "2016-01-01"
+  date > TIMESTAMP "2010-01-01"
 GROUP BY
   date,
   id,

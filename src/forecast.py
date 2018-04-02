@@ -5,7 +5,7 @@ from scipy.stats import binom_test
 from performance import confident_precision
 from parse import get_train_data
 
-# np.random.seed(1337)
+np.random.seed(1337)
 
 from keras.models import Input, Model
 from keras.layers import LSTM, Dense, BatchNormalization, Activation, Dropout, Embedding, merge
@@ -22,11 +22,11 @@ from sklearn.metrics import average_precision_score, precision_recall_curve, con
 dataset = read_csv('data/training.csv', header=0, index_col=0)
 
 n_features = dataset.shape[1]
-n_lags = 3 
+n_lags = 254 
 n_output = 2
-n_epochs = 5000
+n_epochs = 100
 train_split = 0.7
-target = 'market-index_OMX30-c_2_o'
+target = 'target'
 
 print('n_features: %s ' % n_features)
 print('n_lags: %s ' % n_lags)
@@ -60,10 +60,10 @@ def omxmodel (n_inputs, n_features, n_values):
 
     inputs = Input(shape=(n_inputs, n_features))
 
-    # X = LSTM(6, return_sequences=True)(inputs)
+    # X = LSTM(16, return_sequences=True)(inputs)
     # X = Dropout(0.5)(X)
-    X = LSTM(4)(inputs)
-    X = Dropout(0.8)(X)
+    X = LSTM(1)(inputs)
+    # X = Dropout(0.8)(X)
     # X = Dense(units=8, activation='relu')(X)
     # X = Dropout(0.5)(X)
     predictions = Dense(n_values, activation='softmax')(X)
@@ -126,8 +126,8 @@ np.savetxt(
         delimiter=",")
 
 confidence = np.amax(test_y_prob*10,axis=1).astype(int)
-test_y_conf_pred = test_y_pred[confidence > 8]
-test_y_conf_real = test_y[confidence > 8]
+test_y_conf_pred = test_y_pred[confidence > 5]
+test_y_conf_real = test_y[confidence > 5]
 correct_confident = np.sum(test_y_conf_pred == test_y_conf_real)
 n_confident = len(test_y_conf_pred)
 acc_confident = correct_confident / n_confident 
