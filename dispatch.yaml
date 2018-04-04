@@ -1,0 +1,3 @@
+dispatch:
+  - url: "*/forecast/*"
+    service: forecaster

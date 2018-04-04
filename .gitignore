@@ -3,3 +3,4 @@ __pycache__/
 *.h5
 src/*.pyc
 scaler.save
+key.json
