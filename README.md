@@ -12,14 +12,15 @@ A one layer LSTM model with only one unit is used. To make a prediction it is fe
 ## Result
 When training on 70% of the data from 2014 and forward up until today it had 58% accuracy on the remaining 30%. Assuming up and down being just as likely that gives a p-value of less than 0.05
 
-Keep in mind though that this result hasn't been thourougly confirmed yet and that the historical patterns of the stock market can very well change in nature in the future of unknowns.
+![training loss plot](plots/loss.png "training loss")
 
-![training loss](plots/loss.png)
+Keep in mind though that this result hasn't been thoroughly confirmed yet and that the historical patterns of the stock market can very well change in nature in the future of unknowns.
+
 
 ## Usage
 My side project [Finsyn](https://app.finsyn.se) currently runs this on GAE in a opt-in alpha :)
 
-![finsyn screenshot](plots/demo.png)
+![screenshot from finsyn](plots/demo.png "experimental usage")
 
 ## Requirements
  - python 2.7 
