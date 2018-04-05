@@ -20,7 +20,7 @@ class ForecasterHandler(Handler):
 
         topic = 'projects/insikt-e1887/topics/publication-new'
 
-        body = 'FinSyn tror att OMX30 kommer gå %s idag med %s sannolikhet' % (result['direction'], result['probability'])
+        body = 'FinSyn tror att OMX30 kommer gå %s idag (sannolikhet: %s)' % (result['direction'], result['probability'])
 
         payload = {
             'title': b'' ,

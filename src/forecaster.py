@@ -33,7 +33,7 @@ def forecast(n_lags, query_path):
     pred_prob = np.amax(pred_probs)
     pred_idx = np.argmax(pred_prob, axis=-1)
 
-    directions = [ 'DOWN', 'UP' ]
+    directions = [ 'ner', 'upp' ]
     pred_direction = directions[pred_idx]
     
     return (pred_direction, pred_prob)
