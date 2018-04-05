@@ -30,7 +30,7 @@ class ForecasterHandler(Handler):
         }
 
         template_vars = (directions_se[direction], emojis[direction], int(round(probability * 100, 2)))
-        body = 'Idag gissar roboten att OMX30 kommer gå %s %s\n%s%% sannolikhet' % template_vars
+        body = 'Idag gissar roboten att OMX30 kommer gå %s %s\n%s%% självsäker' % template_vars
 
         payload = {
             'title': b'' ,
