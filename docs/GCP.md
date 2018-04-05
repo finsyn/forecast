@@ -10,7 +10,7 @@ gcloud iam service-accounts create forecaster --display-name "market forecaster"
 
 2. add service account as member to role
 ```
-gcloud projects add-iam-policy-binding PROJECT_ID --member serviceAccount:forecaster@PROJECT_ID.iam.gserviceaccount.com --role roles/bigquery.dataViewer
+gcloud projects add-iam-policy-binding PROJECT_ID --member serviceAccount:forecaster@PROJECT_ID.iam.gserviceaccount.com --role roles/bigquery.jobUser --role roles/pubsub.publisher
 ```
 
 3. create service account key
