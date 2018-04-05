@@ -9,7 +9,7 @@ The model is very simple in order to avoid overfitting and takes the following f
 
 A one layer LSTM model with only one unit is used. To make a prediction it is fed a one year long sequence of the input features. It outputs probabilities for OMX30 going down or up the following day.
 
-## Results so far
+## Result
 When training on 70% of the data from 2014 and forward up until today it had 58% accuracy on the remaining 30%. Assuming up and down being just as likely that gives a p-value of less than 0.05
 
 ![training loss](plots/loss.png)
@@ -29,7 +29,7 @@ TBD
 
 ## References
 
-[Multivariate Time Series Forecasting with LSTMs in Keras](https://machinelearningmastery.com/multivariate-time-series-forecasting-lstms-keras/) by Jason Brownlee
-[Deep Learning the Stock Market](https://medium.com/@TalPerry/deep-learning-the-stock-market-df853d139e02) by Tal Perry 
-[On stock return prediction with LSTM networks](http://lup.lub.lu.se/luur/download?func=downloadFile&recordOId=8911069&fileOId=8911070) by Magnus Hansson
+- [Multivariate Time Series Forecasting with LSTMs in Keras](https://machinelearningmastery.com/multivariate-time-series-forecasting-lstms-keras/) by Jason Brownlee
+- [Deep Learning the Stock Market](https://medium.com/@TalPerry/deep-learning-the-stock-market-df853d139e02) by Tal Perry
+- [On stock return prediction with LSTM networks](http://lup.lub.lu.se/luur/download?func=downloadFile&recordOId=8911069&fileOId=8911070) by Magnus Hansson
 
