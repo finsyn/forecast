@@ -15,12 +15,22 @@ Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
 
 class ForecasterHandler(Handler):
 
-    def publish(self, result):
+    def publish(self, direction, probability):
         publisher = pubsub.PublisherClient()
 
         topic = 'projects/insikt-e1887/topics/publication-new'
 
-        body = 'FinSyn tror att OMX30 kommer gå %s idag (sannolikhet: %s)' % (result['direction'], result['probability'])
+        emojis = {
+            'UP': '☀️',
+            'DOWN': '☁️'
+        }
+        directions_se = {
+            'UP': 'upp',
+            'DOWN': 'ner'
+        }
+
+        template_vars = (directions_se[direction], emojis[direction], int(round(probability * 100, 2)))
+        body = 'Idag gissar roboten att OMX30 kommer gå %s %s\n%s%% sannolikhet' % template_vars
 
         payload = {
             'title': b'' ,
@@ -44,7 +54,7 @@ class ForecasterHandler(Handler):
                 'direction': pred_direction,
                 'probability': str(pred_prob)
             }
-            self.publish(result)
+            self.publish(pred_direction, pred_prob)
             self.send_response(200)
         else:
             result = {
