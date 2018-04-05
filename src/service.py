@@ -36,8 +36,7 @@ class ForecasterHandler(Handler):
 
     def do_GET(self):
         if 'X-Appengine-Cron' in self.headers:
-            # (pred_direction, pred_prob) = forecaster.forecast(254, 'indexes.sql')
-            (pred_direction, pred_prob) = ('UP', 0.5)
+            (pred_direction, pred_prob) = forecaster.forecast(254, 'indexes.sql')
             logging.info(
                 '[forecaster] prediction: %s, probability: %s' % (pred_direction, pred_prob)
             )
