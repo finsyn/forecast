@@ -1,6 +1,6 @@
 # OMX30 forecasting
 
-An attempt to make a better guess of OMX30's performance tomorrow based on historical patterns.
+An attempt to guess if OMX30 will go up or down tomorrow based on historical patterns.
 
 The model is very simple in order to avoid overfitting and takes the following features as input:
 
