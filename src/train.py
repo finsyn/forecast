@@ -24,8 +24,8 @@ dataset = read_csv('data/training.csv', header=0, index_col=0)
 n_features = dataset.shape[1]
 n_lags = 254
 n_output = 2
-n_epochs = 100
-train_split = 0.7
+n_epochs = 90
+train_split = 0.8
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -62,7 +62,7 @@ def omxmodel (n_inputs, n_features, n_values):
 
     # X = LSTM(16, return_sequences=True)(inputs)
     # X = Dropout(0.5)(X)
-    X = LSTM(1)(inputs)
+    X = LSTM(2)(inputs)
     # X = Dropout(0.8)(X)
     # X = Dense(units=8, activation='relu')(X)
     # X = Dropout(0.5)(X)

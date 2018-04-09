@@ -1,8 +1,8 @@
 from pandas import isnull, datetime, date_range, read_csv, concat, to_datetime, DataFrame, offsets
 import re
 import numpy as np
-# from sklearn import preprocessing
-# from sklearn.externals import joblib
+from sklearn import preprocessing
+from sklearn.externals import joblib
 from sweholidays import get_trading_close_holidays
 
 # open, close -> return
@@ -130,7 +130,7 @@ def load_features():
     # period of interest
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
     # We only want days when stockholm stock exchange is open
-    start = datetime(2014, 1, 1)
+    start = datetime(2012, 1, 1)
     end = datetime(2018, 3, 30)
     index_range = date_range(
             start,
@@ -142,11 +142,11 @@ def load_features():
 
     df = df.interpolate(limit_direction='both')
 
-    add_calendar_events(df)
+    # add_calendar_events(df)
     df['target'] = df['market-index_OMX30-up']
 
-    # scaler = preprocessing.MinMaxScaler()
-    # df = DataFrame(scaler.fit_transform(df), columns=df.columns, index=df.index)
-    # joblib.dump(scaler, 'scaler.save')
+    scaler = preprocessing.MinMaxScaler()
+    df = DataFrame(scaler.fit_transform(df), columns=df.columns, index=df.index)
+    joblib.dump(scaler, 'scaler.save')
 
     return df
