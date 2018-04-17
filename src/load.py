@@ -1,8 +1,8 @@
 from pandas import isnull, datetime, date_range, read_csv, concat, to_datetime, DataFrame, offsets
 import re
 import numpy as np
-from sklearn import preprocessing
-from sklearn.externals import joblib
+# from sklearn import preprocessing
+# from sklearn.externals import joblib
 from sweholidays import get_trading_close_holidays
 
 # open, close -> return
@@ -145,8 +145,8 @@ def load_features():
     # add_calendar_events(df)
     df['target'] = df['market-index_OMX30-up']
 
-    scaler = preprocessing.MinMaxScaler()
-    df = DataFrame(scaler.fit_transform(df), columns=df.columns, index=df.index)
-    joblib.dump(scaler, 'scaler.save')
+    # scaler = preprocessing.MinMaxScaler()
+    # df = DataFrame(scaler.fit_transform(df), columns=df.columns, index=df.index)
+    # joblib.dump(scaler, 'scaler.save')
 
     return df

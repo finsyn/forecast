@@ -1,6 +1,6 @@
 from pandas import datetime, date_range, offsets
 from extract import query
-from load import load_quotes_daily, add_calendar_events
+from load import load_quotes_daily
 import numpy as np
 from keras.models import load_model
 from datetime import datetime, timedelta 
@@ -24,7 +24,6 @@ def forecast(n_lags, query_path):
     df = df.tail(n_lags)
 
     df['target'] = df['market-index_OMX30-up']
-    add_calendar_events(df)
 
     model = load_model('model.h5')
     sample = df.values.reshape((1, n_lags, len(df.columns)))
