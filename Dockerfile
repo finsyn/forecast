@@ -10,7 +10,7 @@ RUN pip install \
 ENV TF_CPP_MIN_LOG_LEVEL 2
 ENV GOOGLE_APPLICATION_CREDENTIALS /opt/forecaster/key.json
 
-ADD src/ queries model.h5 key.json \
+ADD src/ queries model.h5 \
       ./
 
 EXPOSE 8080
