@@ -25,7 +25,7 @@ n_features = dataset.shape[1]
 n_lags = 254
 n_output = 2
 n_epochs = 90
-train_split = 0.8
+train_split = 1.0
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -95,7 +95,8 @@ history = model.fit(
 
 # performace metrics
 result = model.evaluate(test_X, test_y_oh, verbose=0)
-print('Test set mean absolute error: %s' % result[1])
+if result:
+    print('Test set mean absolute error: %s' % result[1])
 
 # save model
 model.save('model.h5')

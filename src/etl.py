@@ -2,8 +2,8 @@ from load import load_features
 from extract import query
 from pandas import concat
 
-# indexes = query('queries/indexes.sql')
-# indexes.to_csv('data/indexes.csv')
+indexes = query('queries/indexes.sql')
+indexes.to_csv('data/indexes.csv')
 
 # groups = query('queries/groups.sql')
 # groups.to_csv('data/groups.csv')
