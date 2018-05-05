@@ -8,6 +8,7 @@ class SETradingCalendar(AbstractHolidayCalendar):
         Holiday('Christmas', month=12, day=24, observance=nearest_workday),
         Holiday('ChristmasDay', month=12, day=25, observance=nearest_workday),
         Holiday('ChristmasSecondDay', month=12, day=26, observance=nearest_workday),
+        Holiday('NewYearsEve', month=12, day=31, observance=nearest_workday),
         Holiday('WorkersDay', month=5, day=1, observance=nearest_workday)
     ]
 
