@@ -3,7 +3,6 @@
 import forecaster
 import os
 import json
-import logging
 from datetime import datetime
 from google.cloud import pubsub
 
@@ -38,7 +37,7 @@ def publish(direction, probability):
 
 (pred_direction, pred_prob) = forecaster.forecast(254, 'indexes.sql')
 
-logging.info(
+print(
     '[forecaster] prediction: %s, probability: %s' % (pred_direction, pred_prob)
 )
 
