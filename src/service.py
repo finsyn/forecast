@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 from google.cloud import pubsub
 
-def publish(direction, probability):
+def publish_story(direction, probability):
     publisher = pubsub.PublisherClient()
 
     topic = 'projects/insikt-e1887/topics/publication-new'
@@ -34,6 +34,20 @@ def publish(direction, probability):
     data = json.dumps(payload)
     publisher.publish(topic, data)
 
+def publish_trade(direction, probability):
+    publisher = pubsub.PublisherClient()
+
+    topic = 'projects/insikt-e1887/topics/trading'
+
+    payload = {}
+    data = json.dumps(payload)
+    publisher.publish(
+        topic, data,
+        action='open',
+        direction=direction,
+        service_id='market-index_OMX30'
+    )
+
 
 (pred_direction, pred_prob) = forecaster.forecast(254, 'indexes.sql')
 
@@ -46,4 +60,5 @@ result = {
     'probability': str(pred_prob)
 }
 
-publish(pred_direction, pred_prob)
+publish_story(pred_direction, pred_prob)
+publish_trade(pred_direction, pred_prob)
