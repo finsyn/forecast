@@ -94,8 +94,8 @@ cap_hist_ava = run_ava(cap_init, change_hist, pred_up_hist, leverage_ava)
 cap_hist_ig = run_ig(cap_init, diffs_hist, opens_hist, lows_hist, highs_hist,  pred_up_hist, leverage_ig, ig_stop_limit)
 
 label_ava = 'BULL/BEAR AVA X%s' % leverage_ava
-label_ig = 'IG CFD %s SEK/point stop-limit: %s' % (leverage_ig, ig_stop_limit)
-label_long = 'No forecast: AVANZA zero' 
+label_ig = 'IG Sverige30 Cash CFD %s SEK/point stop-limit: %s' % (leverage_ig, ig_stop_limit)
+label_long = 'Benchmark: AVANZA zero without forecast' 
 
 x = range(0, n_lags)
 pyplot.plot(x, cap_hist_ava, 'g-', label=label_ava)
