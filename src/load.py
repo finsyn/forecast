@@ -1,4 +1,4 @@
-from pandas import isnull, datetime, date_range, read_csv, concat, to_datetime, DataFrame, offsets
+from pandas import isnull, datetime, bdate_range, read_csv, concat, to_datetime, DataFrame, offsets
 import re
 import numpy as np
 # from sklearn import preprocessing
@@ -131,11 +131,11 @@ def load_features():
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
     # We only want days when stockholm stock exchange is open
     start = datetime(2012, 1, 1)
-    end = datetime(2018, 3, 30)
-    index_range = date_range(
+    end = datetime(2018, 5, 10)
+    index_range = bdate_range(
             start,
             end,
-            freq=offsets.BDay(),
+            freq='C',
             holidays=get_trading_close_holidays(2018)
             )
     df = df.reindex(index_range)

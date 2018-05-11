@@ -25,7 +25,7 @@ n_features = dataset.shape[1]
 n_lags = 254
 n_output = 2
 n_epochs = 90
-train_split = 1.0
+train_split = 0.8
 target = 'target'
 
 print('n_features: %s ' % n_features)
