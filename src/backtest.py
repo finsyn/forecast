@@ -71,5 +71,10 @@ cap_hist_safe = run_long(cap_init, change_hist, leverage_long)
 cap_hist_ava = run_ava(cap_init, change_hist, pred_up_hist, leverage_ava)
 cap_hist_ig = run_ig(cap_init, diffs_hist, pred_up_hist, leverage_ig)
 
-pyplot.plot(range(0, n_lags), cap_hist_ava, 'g-', cap_hist_safe, 'b-', cap_hist_ig, 'r-')
+x = range(0, n_lags)
+pyplot.plot(x, cap_hist_ava, 'g-', label='Avanza certificates')
+pyplot.plot(x, cap_hist_ig, 'r-', label='IG CFD:s')
+pyplot.plot(x, cap_hist_safe, 'b-', label='Long x1')
+
+pyplot.legend()
 pyplot.show()
