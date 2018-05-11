@@ -4,10 +4,10 @@ from load import load_quotes_daily, read_data_csv
 from sweholidays import get_trading_close_holidays
 from matplotlib import pyplot
 
-leverage_long = 8 
+leverage_long = 1 
 leverage_ava = 8
-leverage_ig = 100
-ig_stop_limit = 10
+leverage_ig = 200
+ig_stop_limit = 5
 
 cap_init = 10000
 
@@ -86,11 +86,7 @@ def run_long(cap_init, closes, leverage):
     cap_hist.append(cap)
     for i in range(1, n_lags):
         cap *= 1 + (closes[i]/closes[i-1] - 1) * leverage
-        # product fee
-        cap *= 1 - 0.0006 
         cap_hist.append(cap.copy())
-    # one time spread fee
-    cap *= 1 - 0.0012
     return cap_hist
 
 cap_hist_safe = run_long(cap_init, close_hist, leverage_long)
@@ -98,13 +94,16 @@ cap_hist_ava = run_ava(cap_init, change_hist, pred_up_hist, leverage_ava)
 cap_hist_ig = run_ig(cap_init, diffs_hist, opens_hist, lows_hist, highs_hist,  pred_up_hist, leverage_ig, ig_stop_limit)
 
 label_ava = 'BULL/BEAR AVA X%s' % leverage_ava
-label_ig = 'IG CFD X%s stop-limit: %s' % (leverage_ig, ig_stop_limit)
-label_long = 'BULL AVA X%s' % leverage_long
+label_ig = 'IG CFD %s SEK/point stop-limit: %s' % (leverage_ig, ig_stop_limit)
+label_long = 'No forecast: AVANZA zero' 
 
 x = range(0, n_lags)
 pyplot.plot(x, cap_hist_ava, 'g-', label=label_ava)
 pyplot.plot(x, cap_hist_ig, 'r-', label=label_ig)
 pyplot.plot(x, cap_hist_safe, 'b-', label=label_long)
 
+pyplot.title('Using forecast for daily long/short positions (fees included)')
+pyplot.xlabel('Business days')
+pyplot.ylabel('SEK')
 pyplot.legend()
 pyplot.show()
