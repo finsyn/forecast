@@ -38,7 +38,7 @@ def publish_story(direction, probability):
 def publish_prediction(direction, probability):
     publisher = pubsub.PublisherClient()
 
-    topic = 'projects/insikt-e1887/topics/predictions'
+    topic = 'projects/insikt-e1887/topics/market.prediction'
 
     values = {
         'UP': 1,
@@ -50,7 +50,7 @@ def publish_prediction(direction, probability):
     payload = {
         'service_id': 'market-index_OMX30',
         'value': values[direction],
-        'probability': probability,
+        'probability': "{:.2f}".format(probability),
         'period': 'B'
     }
     data = json.dumps(payload)
