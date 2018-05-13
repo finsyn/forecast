@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 from google.cloud import pubsub
 
+# TODO: have an editor listen to prediction events instead
 def publish_story(direction, probability):
     publisher = pubsub.PublisherClient()
 
@@ -34,18 +35,27 @@ def publish_story(direction, probability):
     data = json.dumps(payload)
     publisher.publish(topic, data)
 
-def publish_trade(direction, probability):
+def publish_prediction(direction, probability):
     publisher = pubsub.PublisherClient()
 
-    topic = 'projects/insikt-e1887/topics/trading'
+    topic = 'projects/insikt-e1887/topics/predictions'
 
-    payload = {}
+    values = {
+        'UP': 1,
+        'DOWN': 0
+    }
+
+    # period string following pandas standard:
+    # http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
+    payload = {
+        'service_id': 'market-index_OMX30',
+        'value': values[direction],
+        'probability': probability,
+        'period': 'B'
+    }
     data = json.dumps(payload)
     publisher.publish(
-        topic, data,
-        action='open',
-        direction=direction,
-        service_id='market-index_OMX30'
+        topic, data
     )
 
 
@@ -55,10 +65,5 @@ print(
     '[forecaster] prediction: %s, probability: %s' % (pred_direction, pred_prob)
 )
 
-result = {
-    'direction': pred_direction,
-    'probability': str(pred_prob)
-}
-
 publish_story(pred_direction, pred_prob)
-publish_trade(pred_direction, pred_prob)
+publish_prediction(pred_direction, pred_prob)
