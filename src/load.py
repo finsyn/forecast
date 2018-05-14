@@ -53,8 +53,9 @@ def load_quotes_daily(df):
 
         c = df.loc[df['id'] == s_id]
         o = DataFrame()
-        if (s_id != 'market-index_XLRE'):
-            o['up'] = (ret(c.o,c.c) > 0.0).astype(int)
+
+        o['up'] = (ret(c.o,c.c) > 0.0).astype(int)
+        o['bigdiff'] = (abs(ret(c.o,c.c) > 0.01)).astype(int)
         cols.append(o)
         names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
 
