@@ -11,21 +11,21 @@ from keras.models import Input, Model
 from keras.layers import LSTM, Dense, BatchNormalization, Activation, Dropout, Embedding, merge
 from keras.layers.core import *
 from keras.utils import to_categorical
-from keras.optimizers import Adam 
+from keras.optimizers import Adam
 from keras.backend import argmax
 
 from matplotlib import pyplot
 
 from sklearn import preprocessing
-from sklearn.metrics import average_precision_score, precision_recall_curve, confusion_matrix
+from sklearn.metrics import confusion_matrix
 
 dataset = read_csv('data/training.csv', header=0, index_col=0)
 
 n_features = dataset.shape[1]
 n_lags = 254
 n_output = 2
-n_epochs = 90
-train_split = 0.8
+n_epochs = 100
+train_split = 1.0
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -44,7 +44,7 @@ print('market going up   %s times in dataset' % np.sum(Y))
 print('market going down %s times in dataset' % np.sum(np.ones(len(Y)) - Y))
 
 # split into train and test sets
-n_train = int(values.shape[0] * train_split) 
+n_train = int(values.shape[0] * train_split)
 
 # split into input and outputs
 train_X, train_y = X[:n_train,:], Y[:n_train]
@@ -62,8 +62,8 @@ def omxmodel (n_inputs, n_features, n_values):
 
     # X = LSTM(16, return_sequences=True)(inputs)
     # X = Dropout(0.5)(X)
-    X = LSTM(2)(inputs)
-    # X = Dropout(0.8)(X)
+    X = LSTM(1)(inputs)
+    # X = Dropout(0.5)(X)
     # X = Dense(units=8, activation='relu')(X)
     # X = Dropout(0.5)(X)
     predictions = Dense(n_values, activation='softmax')(X)
@@ -110,10 +110,8 @@ pyplot.legend()
 
 test_y_prob = model.predict(test_X)
 
-avg_precision = average_precision_score(test_y_oh, test_y_prob) 
-print('Test set average precision score: %s' % avg_precision)
 # get actual predictions
-test_y_pred = np.argmax(test_y_prob, axis=-1) 
+test_y_pred = np.argmax(test_y_prob, axis=-1)
 
 print('Test set confusion matrix:')
 print(confusion_matrix(test_y, test_y_pred))
@@ -131,7 +129,7 @@ test_y_conf_pred = test_y_pred[confidence > 5]
 test_y_conf_real = test_y[confidence > 5]
 correct_confident = np.sum(test_y_conf_pred == test_y_conf_real)
 n_confident = len(test_y_conf_pred)
-acc_confident = correct_confident / n_confident 
+acc_confident = correct_confident / n_confident
 p_val_confident = binom_test(correct_confident, n_confident)
 
 
