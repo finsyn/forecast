@@ -1,15 +1,16 @@
 import numpy as np
 import pandas as pd
+import copy
 from load import load_quotes_daily, read_data_csv
 from sweholidays import get_trading_close_holidays
 from matplotlib import pyplot
 
-leverage_long = 1 
+leverage_long = 1
 leverage_ava = 8
-leverage_ig = 200
-ig_stop_limit = 5
+leverage_ig = 20
+ig_stop_limit = 3
 
-cap_init = 10000
+cap_init = 3000
 
 res = np.genfromtxt('data/test-output.csv', delimiter=',')
 y_h = res[0]
@@ -19,6 +20,7 @@ df = read_data_csv('data/indexes.csv')
 
 o = pd.DataFrame()
 c = df.loc[df['id'] == 'market-index_OMX30']
+
 o['diff'] = c.c - c.o
 o['close'] = c.c
 o['open'] = c.o
@@ -47,13 +49,19 @@ lows_hist = o['low'].values
 highs_hist = o['high'].values
 pred_up_hist = y_h.astype(bool)
 
-def run_ava(cap_init, changes, predictions, leverage): 
+# history of previous bdays closing and current day
+diffs_c2c_hist = [0]
+for i in range(1, len(close_hist)):
+    diffs_c2c_hist.append(close_hist[i] - close_hist[i-1])
+diffs_c2c_hist = np.array(diffs_c2c_hist)
+
+def run_ava(cap_init, changes, predictions, leverage):
     cap_hist = []
     cap = cap_init
     for i in range(0, n_lags):
         multiplier = leverage if predictions[i] else -1 * leverage
-        cap *= 1 + multiplier * changes[i] 
-        # product fee 
+        cap *= 1 + multiplier * changes[i]
+        # product fee
         cap *= 1 - 0.0006
         # spread fee
         cap *= 1 - 0.0012
@@ -72,15 +80,17 @@ def run_ig(cap_init, diffs, opens, lows, highs, predictions, leverage, stop_limi
             (highs[i] - opens[i] > stop_limit and not pred)
         ):
             cap -= leverage * stop_limit
+            # stop loss fee
+            cap -= leverage * 0.8
         else:
             cap += multiplier * diffs[i]
         # spread fee
         cap -= leverage * 0.5
-        cap_hist.append(cap.copy())
+        cap_hist.append(copy.copy(cap))
     return cap_hist
 
 
-def run_long(cap_init, closes, leverage): 
+def run_long(cap_init, closes, leverage):
     cap_hist = []
     cap = cap_init
     cap_hist.append(cap)
@@ -95,7 +105,7 @@ cap_hist_ig = run_ig(cap_init, diffs_hist, opens_hist, lows_hist, highs_hist,  p
 
 label_ava = 'BULL/BEAR AVA X%s' % leverage_ava
 label_ig = 'IG Sverige30 Cash CFD %s SEK/point stop-limit: %s' % (leverage_ig, ig_stop_limit)
-label_long = 'Benchmark: AVANZA zero without forecast' 
+label_long = 'Benchmark: AVANZA zero without forecast'
 
 x = range(0, n_lags)
 pyplot.plot(x, cap_hist_ava, 'g-', label=label_ava)
