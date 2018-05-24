@@ -31,8 +31,9 @@ AND
     'market-index_EURONEXT',
     'market-index_FTSE',
     'market-index_GDAXI',
-    'market-index_HANGSENG',
-    'market-index_NIKKEI',
+    /* issues to get opening prices on these from the daily job */     
+    /* 'market-index_HANGSENG', */
+    /* 'market-index_NIKKEI', */
     'market-index_NYSE',
     'market-index_OMX30',
     'market-index_SP500',
