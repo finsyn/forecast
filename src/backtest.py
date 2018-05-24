@@ -8,7 +8,7 @@ from matplotlib import pyplot
 leverage_long = 1
 leverage_ava = 8
 leverage_ig = 20
-ig_stop_limit = 3
+ig_stop_limit = 5
 
 cap_init = 3000
 
@@ -30,7 +30,7 @@ o['change'] = (c.c - c.o)/c.o
 
 # remove dates when STO is closed
 index_range = pd.bdate_range(
-            end=pd.datetime(2018, 5, 10),
+            end=pd.datetime(2018, 5, 23),
             periods=n_lags,
             freq='C',
             holidays=get_trading_close_holidays(2018)
@@ -56,7 +56,7 @@ for i in range(1, len(close_hist)):
 diffs_c2c_hist = np.array(diffs_c2c_hist)
 
 def run_ava(cap_init, changes, predictions, leverage):
-    cap_hist = []
+    cap_hist = [cap_init]
     cap = cap_init
     for i in range(0, n_lags):
         multiplier = leverage if predictions[i] else -1 * leverage
@@ -69,14 +69,14 @@ def run_ava(cap_init, changes, predictions, leverage):
     return cap_hist
 
 def run_ig(cap_init, diffs, opens, lows, highs, predictions, leverage, stop_limit):
-    cap_hist = []
+    cap_hist = [cap_init]
     cap = cap_init
     for i in range(0, n_lags):
         pred = predictions[i]
         multiplier = leverage if pred else -1 * leverage
         # stop limit
         if (
-            (opens[i] - lows[i]  > stop_limit and pred) or
+            (opens[i] - lows[i] > stop_limit and pred) or
             (highs[i] - opens[i] > stop_limit and not pred)
         ):
             cap -= leverage * stop_limit
@@ -84,6 +84,7 @@ def run_ig(cap_init, diffs, opens, lows, highs, predictions, leverage, stop_limi
             cap -= leverage * 0.8
         else:
             cap += multiplier * diffs[i]
+
         # spread fee
         cap -= leverage * 0.5
         cap_hist.append(copy.copy(cap))
@@ -91,7 +92,7 @@ def run_ig(cap_init, diffs, opens, lows, highs, predictions, leverage, stop_limi
 
 
 def run_long(cap_init, closes, leverage):
-    cap_hist = []
+    cap_hist = [cap_init]
     cap = cap_init
     cap_hist.append(cap)
     for i in range(1, n_lags):
@@ -101,16 +102,31 @@ def run_long(cap_init, closes, leverage):
 
 cap_hist_safe = run_long(cap_init, close_hist, leverage_long)
 cap_hist_ava = run_ava(cap_init, change_hist, pred_up_hist, leverage_ava)
-cap_hist_ig = run_ig(cap_init, diffs_hist, opens_hist, lows_hist, highs_hist,  pred_up_hist, leverage_ig, ig_stop_limit)
+cap_hist_ig = run_ig(
+    cap_init,
+    diffs_hist,
+    opens_hist,
+    lows_hist,
+    highs_hist,
+    pred_up_hist,
+    leverage_ig,
+    ig_stop_limit
+)
 
 label_ava = 'BULL/BEAR AVA X%s' % leverage_ava
 label_ig = 'IG Sverige30 Cash CFD %s SEK/point stop-limit: %s' % (leverage_ig, ig_stop_limit)
 label_long = 'Benchmark: AVANZA zero without forecast'
 
-x = range(0, n_lags)
+x = range(0, n_lags+1)
 pyplot.plot(x, cap_hist_ava, 'g-', label=label_ava)
 pyplot.plot(x, cap_hist_ig, 'r-', label=label_ig)
 pyplot.plot(x, cap_hist_safe, 'b-', label=label_long)
+
+# pyplot.plot(x, abs(diffs_hist))
+# pyplot.plot(x, highs_hist-lows_hist)
+# pyplot.hist(abs(diffs_hist),normed=True)
+# median_diff = abs(diffs_hist)[len(diffs_hist)/2]
+# median_highlowdiff = (highs_hist-lows_hist)[len(diffs_hist)/2]
 
 pyplot.title('Using forecast for daily long/short positions (fees included)')
 pyplot.xlabel('Business days')

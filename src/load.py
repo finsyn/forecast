@@ -1,5 +1,4 @@
-from pandas import isnull, datetime, bdate_range, read_csv, concat, to_datetime, DataFrame, offsets
-import re
+from pandas import isnull, datetime, bdate_range, read_csv, read_json, concat, to_datetime, DataFrame, offsets
 import numpy as np
 # from sklearn import preprocessing
 # from sklearn.externals import joblib
@@ -15,6 +14,30 @@ def read_data_csv(csvfile):
             index_col=0
             )
     df.index = to_datetime(df.index,format='%Y-%m-%d') # Set the indix to a datetime
+    return df
+
+def load_commodities(df):
+    commodities = list(set(df['id'].values))
+
+    print('loading daily commodities for %s entities' % len(commodities))
+    
+    cols, names = list(), list()
+
+    for s_id in commodities:
+
+        c = df.loc[df['id'] == s_id]
+        o = DataFrame()
+        o['up'] = (ret(c['c'].shift(1),c['c']) > 0.0).astype(int)
+
+        cols.append(o)
+        names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
+
+    agg = concat(cols, axis=1)
+    agg.columns = names
+
+    agg.index.name = 'date'
+    return agg 
+
     return df
 
 def load_groups(df):
@@ -44,7 +67,7 @@ def load_groups(df):
 def load_quotes_daily(df):
     securities = list(set(df['id'].values))
 
-    # securities = ['market-index_OMX30', 'market-index_VIX']
+    # securities = ['market-index_OMX30']
     print('loading daily quotes for %s entities' % len(securities))
     
     cols, names = list(), list()
@@ -120,11 +143,13 @@ def load_features():
     df_groups_raw = read_data_csv('data/groups.csv')
     df_shorts_raw = read_data_csv('data/shorts.csv')
     df_insiders_raw = read_data_csv('data/insiders.csv')
+    df_commodities_raw = read_data_csv('data/commodities.csv')
    
     df_indexes = load_quotes_daily(df_indexes_raw)
     df_groups = load_groups(df_groups_raw)
     df_shorts = load_shorts(df_shorts_raw)
     df_insiders = load_insiders(df_insiders_raw)
+    df_commodities = load_commodities(df_commodities_raw)
    
     df = concat([df_indexes], axis=1, join='outer')
 
@@ -132,7 +157,7 @@ def load_features():
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
     # We only want days when stockholm stock exchange is open
     start = datetime(2012, 1, 1)
-    end = datetime(2018, 5, 10)
+    end = datetime(2018, 5, 23)
     index_range = bdate_range(
             start,
             end,

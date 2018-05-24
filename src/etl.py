@@ -5,6 +5,9 @@ from pandas import concat
 indexes = query('queries/indexes.sql')
 indexes.to_csv('data/indexes.csv')
 
+# commodities = query('queries/commodities.sql')
+# commodities.to_csv('data/commodities.csv')
+
 # groups = query('queries/groups.sql')
 # groups.to_csv('data/groups.csv')
 

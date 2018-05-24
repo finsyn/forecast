@@ -20,7 +20,7 @@ FROM
 ) quotes
 LEFT JOIN `notifications.shares` as shares on shares.service_id = quotes.service_id
 WHERE
-  close > 0.0
+  close > 0.0 AND open > 0.0
 AND
 (
   quotes.service_id IN (
