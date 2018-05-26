@@ -22,10 +22,10 @@ from sklearn.metrics import confusion_matrix
 dataset = read_csv('data/training.csv', header=0, index_col=0)
 
 n_features = dataset.shape[1]
-n_lags = 254
+n_lags = 3
 n_output = 2
-n_epochs = 100
-train_split = 1.0
+n_epochs = 500
+train_split = 0.8
 target = 'target'
 
 print('n_features: %s ' % n_features)

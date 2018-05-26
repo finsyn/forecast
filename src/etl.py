@@ -2,8 +2,11 @@ from load import load_features
 from extract import query
 from pandas import concat
 
-indexes = query('queries/indexes.sql')
-indexes.to_csv('data/indexes.csv')
+# indexes = query('queries/indexes.sql')
+# indexes.to_csv('data/indexes.csv')
+
+cfds = query('queries/cfds.sql')
+cfds.to_csv('data/cfds.csv')
 
 # commodities = query('queries/commodities.sql')
 # commodities.to_csv('data/commodities.csv')

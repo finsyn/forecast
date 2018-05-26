@@ -78,7 +78,7 @@ def load_quotes_daily(df):
         o = DataFrame()
 
         o['up'] = (ret(c.o,c.c) > 0.0).astype(int)
-        o['bigdiff'] = (abs(ret(c.o,c.c) > 0.01)).astype(int)
+        # o['bigdiff'] = (abs(ret(c.o,c.c) > 0.01)).astype(int)
         cols.append(o)
         names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
 
@@ -140,24 +140,26 @@ def add_calendar_events(df):
 
 def load_features():
     df_indexes_raw = read_data_csv('data/indexes.csv')
+    df_cfds_raw = read_data_csv('data/cfds.csv')
     df_groups_raw = read_data_csv('data/groups.csv')
     df_shorts_raw = read_data_csv('data/shorts.csv')
     df_insiders_raw = read_data_csv('data/insiders.csv')
     df_commodities_raw = read_data_csv('data/commodities.csv')
    
     df_indexes = load_quotes_daily(df_indexes_raw)
+    df_cfds = load_quotes_daily(df_cfds_raw)
     df_groups = load_groups(df_groups_raw)
     df_shorts = load_shorts(df_shorts_raw)
     df_insiders = load_insiders(df_insiders_raw)
     df_commodities = load_commodities(df_commodities_raw)
    
-    df = concat([df_indexes], axis=1, join='outer')
+    df = concat([df_indexes, df_cfds], axis=1, join='outer')
 
     # period of interest
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
     # We only want days when stockholm stock exchange is open
-    start = datetime(2012, 1, 1)
-    end = datetime(2018, 5, 23)
+    start = datetime(2017, 5, 29)
+    end = datetime(2018, 5, 25)
     index_range = bdate_range(
             start,
             end,
@@ -169,7 +171,7 @@ def load_features():
     df = df.interpolate(limit_direction='both')
 
     # add_calendar_events(df)
-    df['target'] = df['market-index_OMX30-up']
+    df['target'] = df['cfd_OMX30-20SEK-HOUR-up']
 
     # scaler = preprocessing.MinMaxScaler()
     # df = DataFrame(scaler.fit_transform(df), columns=df.columns, index=df.index)
