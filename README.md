@@ -21,6 +21,27 @@ My side project [Finsyn](https://app.finsyn.se) currently runs this on GAE in a 
 
 ![screenshot from finsyn](plots/demo.png "experimental usage")
 
+### IG CFD trading
+The model has been used to conduct real trades of OMX30-SEK20 CFD:s on ig.com. 
+
+Unfortunately I have noticed that the opening price I get on IG CFD on market opening
+doesn't match what is advertised by Yahoo Finance (which seems to match Nasdaq).
+
+The intraday market direction of the CFD and the actual underlying index seems to be the same only about ~80% of the time the last year.
+
+```
+start = datetime(2017, 5, 29)
+end = datetime(2018, 5, 25)
+
+IG vs Yahoo/Nasdaq intraday diff direction matches (OMX30)
+count      240
+unique       2
+top       True
+freq       200
+```
+
+Opening prices during the same timespan differed about 4 points on average with a median of 3.
+
 ## Requirements
  - python 2.7 
  - keras, pandas, matplotlib, scikitlearn, docker etc.
