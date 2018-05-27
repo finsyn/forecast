@@ -22,7 +22,7 @@ def publish_story(direction, probability):
     }
 
     template_vars = (directions_se[direction], emojis[direction], int(round(probability * 100, 2)))
-    body = 'Idag gissar roboten att OMX30 kommer gå %s %s\n%s%% självsäker' % template_vars
+    body = 'Idag gissar roboten att OMX30 CFD på IG.com kommer gå %s %s\n%s%% självsäker' % template_vars
 
     payload = {
         'title': b'' ,
@@ -59,7 +59,7 @@ def publish_prediction(direction, probability):
     )
 
 
-(pred_direction, pred_prob) = forecaster.forecast(254, 'indexes.sql')
+(pred_direction, pred_prob) = forecaster.forecast('cfds.sql')
 
 print(
     '[forecaster] prediction: %s, probability: %s' % (pred_direction, pred_prob)

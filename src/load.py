@@ -231,7 +231,7 @@ def load_features():
     df = df[12:]
 
     scaler = preprocessing.MinMaxScaler()
-    df = DataFrame(scaler.fit_transform(df), columns=df.columns, index=df.index)
+    df[df_indicators.columns] = scaler.fit_transform(df[df_indicators.columns])
     joblib.dump(scaler, 'scaler.save')
 
     return df

@@ -8,7 +8,7 @@ from matplotlib import pyplot
 leverage_long = 1
 leverage_ava = 8
 leverage_ig = 20
-ig_stop_limit = 5
+ig_stop_limit = 3
 
 cap_init = 3000
 
@@ -16,10 +16,10 @@ res = np.genfromtxt('data/test-output.csv', delimiter=',')
 y_h = res[0]
 
 n_lags = len(y_h)
-df = read_data_csv('data/indexes.csv')
+df = read_data_csv('data/cfds.csv')
 
 o = pd.DataFrame()
-c = df.loc[df['id'] == 'market-index_OMX30']
+c = df.loc[df['id'] == 'cfd_OMX30-20SEK-HOUR']
 
 o['diff'] = c.c - c.o
 o['close'] = c.c
