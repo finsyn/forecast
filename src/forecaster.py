@@ -1,34 +1,35 @@
-from pandas import datetime, date_range, offsets
+from pandas import datetime, date_range, offsets, concat
 from extract import query
-from load import load_quotes_daily
+from load import load_indicators, load_target
 import numpy as np
 from keras.models import load_model
 from datetime import datetime, timedelta 
 from sweholidays import get_trading_close_holidays
 
-def forecast(n_lags, query_path):
+def forecast(query_path):
     quotes_df_raw = query(query_path)
-    quotes_df = load_quotes_daily(quotes_df_raw)
+    quotes_df = load_indicators(quotes_df_raw)
+    target_df = load_target(quotes_df_raw)
 
+    df = concat([quotes_df, target_df], axis=1, join='outer')
     # remove dates when STO is closed
     # up until yesterday since that is the last day from which
     # we have all data
     index_range = date_range(
                 end=datetime.now().date() - timedelta(1),
-                periods=n_lags,
+                periods=1,
                 freq=offsets.BDay(),
                 holidays=get_trading_close_holidays(2018)
                 )
 
-    df = quotes_df.reindex(index_range)
+    df = df.reindex(index_range)
 
     df = df.interpolate(limit_direction='both')
-    df = df.tail(n_lags)
+    df.drop(['target'], axis=1, inplace=True)
 
-    df['target'] = df['market-index_OMX30-up']
-
+    print(df)
     model = load_model('model.h5')
-    sample = df.values.reshape((1, n_lags, len(df.columns)))
+    sample = df.values
 
     pred_probs = model.predict(sample)[0]
     pred_prob = np.amax(pred_probs)

@@ -5,7 +5,7 @@ from scipy.stats import binom_test
 from performance import confident_precision
 from parse import get_train_data
 
-# np.random.seed(1337)
+np.random.seed(1337)
 
 from keras.models import Input, Model
 from keras.layers import LSTM, Dense, BatchNormalization, Activation, Dropout, Embedding, merge
@@ -21,22 +21,22 @@ from sklearn.metrics import confusion_matrix
 
 dataset = read_csv('data/training.csv', header=0, index_col=0)
 
-n_features = dataset.shape[1]
-n_lags = 3 
+n_features = dataset.shape[1]-1
 n_output = 2
 n_epochs = 1000
 train_split = 0.8
 target = 'target'
 
 print('n_features: %s ' % n_features)
-print('n_lags: %s ' % n_lags)
 
-data = get_train_data(dataset, target=target, n_lags=n_lags)
+print(dataset)
 
-values = data.values
+values = dataset.values
 
-X = values[:,:-1]
-Y = values[:,-1]
+X = values[:-1,:-1]
+print(X)
+Y = values[1:,-1]
+print(Y)
 
 # make target column boolean
 Y = Y > 0.0
@@ -50,22 +50,11 @@ n_train = int(values.shape[0] * train_split)
 train_X, train_y = X[:n_train,:], Y[:n_train]
 test_X, test_y = X[n_train:,:], Y[n_train:]
 
-# reshape input to be 3D [samples, timesteps, features]
-train_X = train_X.reshape((train_X.shape[0], n_lags, n_features))
-test_X = test_X.reshape((test_X.shape[0], n_lags, n_features))
+def omxmodel (n_features, n_values):
 
-print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
+    inputs = Input(shape=(n_features,))
 
-def omxmodel (n_inputs, n_features, n_values):
-
-    inputs = Input(shape=(n_inputs, n_features))
-
-    # X = LSTM(16, return_sequences=True)(inputs)
-    # X = Dropout(0.5)(X)
-    X = LSTM(1)(inputs)
-    # X = Dropout(0.5)(X)
-    # X = Dense(units=8, activation='relu')(X)
-    # X = Dropout(0.5)(X)
+    X = Dense(units=10, activation='relu')(inputs)
     predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -76,7 +65,7 @@ def omxmodel (n_inputs, n_features, n_values):
 train_y_oh = to_categorical(train_y, num_classes=n_output)
 test_y_oh  = to_categorical(test_y , num_classes=n_output)
 
-model = omxmodel(n_lags, n_features, n_output)
+model = omxmodel(n_features, n_output)
 
 print(model.summary())
 
@@ -84,12 +73,12 @@ print(model.summary())
 model.compile(
         loss='binary_crossentropy',
         metrics=['accuracy'],
-        optimizer='adam')
+        optimizer='sgd')
 
 # fit network
 history = model.fit(
         train_X, train_y_oh,
-        epochs=n_epochs, batch_size=2,
+        epochs=n_epochs, batch_size=1,
         validation_data=(test_X, test_y_oh),
         shuffle=False)
 

@@ -1,11 +1,9 @@
 from pandas import isnull, datetime, bdate_range, read_csv, read_json, concat, to_datetime, DataFrame, offsets
 import numpy as np
-# from sklearn import preprocessing
-# from sklearn.externals import joblib
+from technical import asy, rlog, ma, psy
+from sklearn import preprocessing
+from sklearn.externals import joblib
 from sweholidays import get_trading_close_holidays
-
-# open, close -> return
-ret = lambda x,y: np.log(y/x) #Log return 
 
 def read_data_csv(csvfile):
     df = read_csv(
@@ -15,6 +13,52 @@ def read_data_csv(csvfile):
             )
     df.index = to_datetime(df.index,format='%Y-%m-%d') # Set the indix to a datetime
     return df
+
+def load_target(df):
+    o = DataFrame()
+    o['target'] = (rlog(df['c'],df['o']) > 0.0).astype(int)
+    o.index.name = 'date'
+    return o
+
+# A substitute for OBV indicator since we dont have
+# OMX30 trade volume
+def load_volume(df):
+    o = DataFrame()
+    o['obv'] = df['v'] 
+    o.index.name = 'date'
+    return o
+
+# Indicators from Mingyue Qiu and Yu Song
+# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4873195/#!po=48.9130
+def load_indicators(df):
+    quotes = list(set(df['id'].values))
+
+    print('loading daily technical indicators (type 2) for %s entities' % len(quotes))
+    
+    cols, names = list(), list()
+
+    for s_id in quotes:
+
+        c = df.loc[df['id'] == s_id]['c']
+        open = df.loc[df['id'] == s_id]['o']
+        o = DataFrame()
+        o['ma5'] = ma(5, c)
+        o['bias6'] = (c - ma(6, c)) / ma(6, c)
+        o['psy12'] = psy(12, c)
+        o['asy5'] = asy(5, c)
+        o['asy4'] = asy(4, c)
+        o['asy3'] = asy(3, c) 
+        o['asy2'] = asy(2, c)
+        o['asy1'] = asy(1, c)
+
+        cols.append(o)
+        names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
+
+    agg = concat(cols, axis=1)
+    agg.columns = names
+
+    agg.index.name = 'date'
+    return agg 
 
 def load_commodities(df):
     commodities = list(set(df['id'].values))
@@ -27,7 +71,7 @@ def load_commodities(df):
 
         c = df.loc[df['id'] == s_id]
         o = DataFrame()
-        o['up'] = (ret(c['c'].shift(1),c['c']) > 0.0).astype(int)
+        o['up'] = (rlog(c['c'].shift(1),c['c']) > 0.0).astype(int)
 
         cols.append(o)
         names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
@@ -77,8 +121,10 @@ def load_quotes_daily(df):
         c = df.loc[df['id'] == s_id]
         o = DataFrame()
 
-        o['up'] = (ret(c.o,c.c) > 0.0).astype(int)
-        # o['bigdiff'] = (abs(ret(c.o,c.c) > 0.01)).astype(int)
+        o['up'] = (rlog(c.o,c.c) > 0.0).astype(int)
+        # o['psy12'] = psy(12, c.c)
+        # o['asy1'] = asy(1, c.c)
+        # o['bigdiff'] = (abs(rlog(c.o,c.c) > 0.01)).astype(int)
         cols.append(o)
         names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
 
@@ -152,8 +198,21 @@ def load_features():
     df_shorts = load_shorts(df_shorts_raw)
     df_insiders = load_insiders(df_insiders_raw)
     df_commodities = load_commodities(df_commodities_raw)
-   
-    df = concat([df_indexes, df_cfds], axis=1, join='outer')
+    df_indicators = load_indicators(df_cfds_raw)
+    df_volume = load_volume(
+        df_indexes_raw.loc[df_indexes_raw['id'] == 'market-index_SP500']
+    )
+    df_indicators_long = load_indicators(
+        df_indexes_raw.loc[df_indexes_raw['id'] == 'market-index_OMX30']
+    )
+    df_target_long = load_target(
+        df_indexes_raw.loc[df_indexes_raw['id'] == 'market-index_OMX30']
+    )
+
+    df_target = load_target(df_cfds_raw.loc[df_cfds_raw['id'] == 'cfd_OMX30-20SEK-HOUR'])
+    df_target_yahoo = load_target(df_indexes_raw.loc[df_indexes_raw['id'] == 'market-index_OMX30'])
+
+    df = concat([df_indicators, df_target], axis=1, join='outer')
 
     # period of interest
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
@@ -168,13 +227,11 @@ def load_features():
             )
     df = df.reindex(index_range)
 
-    df = df.interpolate(limit_direction='both')
+    df = df.interpolate()
+    df = df[12:]
 
-    # add_calendar_events(df)
-    df['target'] = df['cfd_OMX30-20SEK-HOUR-up']
-
-    # scaler = preprocessing.MinMaxScaler()
-    # df = DataFrame(scaler.fit_transform(df), columns=df.columns, index=df.index)
-    # joblib.dump(scaler, 'scaler.save')
+    scaler = preprocessing.MinMaxScaler()
+    df = DataFrame(scaler.fit_transform(df), columns=df.columns, index=df.index)
+    joblib.dump(scaler, 'scaler.save')
 
     return df
