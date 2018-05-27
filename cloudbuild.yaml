@@ -5,6 +5,12 @@ steps:
        'gs://finsyn-ml-data/models/model.h5',
        'model.h5'
        ]
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: [
+       'cp',
+       'gs://finsyn-ml-data/models/scaler.save',
+       'scaler.save'
+       ]
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build',
