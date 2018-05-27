@@ -1,7 +1,7 @@
 # technical analysis utility functions 
 # tests
 
-from technical import asy 
+from technical import asy, psy
 from pandas import DataFrame
 import math
 import unittest
@@ -23,6 +23,14 @@ class TestTechAnalysis(unittest.TestCase):
 
         self.assertTrue(math.isnan(mars.iloc[0]))
         self.assertTrue(math.isnan(mars.iloc[1]))
-        
+
+    def test_psy(self):
+        psyr = psy(3, mock_close['close'])
+        self.assertTrue(math.isnan(psyr.iloc[0]))
+        self.assertTrue(math.isnan(psyr.iloc[1]))
+        self.assertEqual(2./3., psyr[2])
+        self.assertEqual(1, psyr[3])
+        self.assertEqual(1, psyr[4])
+       
 if __name__ == '__main__':
     unittest.main()
