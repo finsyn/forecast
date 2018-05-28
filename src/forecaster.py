@@ -1,4 +1,4 @@
-from pandas import datetime, date_range, offsets, concat
+from pandas import datetime, bdate_range, offsets, concat
 from extract import query
 from load import load_indicators, load_target
 import numpy as np
@@ -16,10 +16,10 @@ def forecast(query_path):
     # remove dates when STO is closed
     # up until yesterday since that is the last day from which
     # we have all data
-    index_range = date_range(
+    index_range = bdate_range(
                 end=datetime.now().date() - timedelta(1),
                 periods=1,
-                freq=offsets.BDay(),
+                freq='C',
                 holidays=get_trading_close_holidays(2018)
                 )
 
