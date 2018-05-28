@@ -5,7 +5,8 @@ WORKDIR /opt/forecaster/
 RUN pip install \
       pandas \
       pandas-gbq \
-      google-cloud-pubsub
+      google-cloud-pubsub \
+      sklearn
 
 ENV TF_CPP_MIN_LOG_LEVEL 2
 ENV GOOGLE_APPLICATION_CREDENTIALS /opt/forecaster/key.json
