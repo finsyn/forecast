@@ -27,6 +27,7 @@ def forecast(query_path):
 
     df = df.interpolate(limit_direction='both')
 
+    print(df)
     model = load_model('model.h5')
     sample = df.values
 

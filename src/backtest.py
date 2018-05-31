@@ -8,7 +8,7 @@ from matplotlib import pyplot
 leverage_long = 1
 leverage_ava = 8
 leverage_ig = 20
-ig_stop_limit = 3
+ig_stop_limit = 5
 
 cap_init = 3000
 
@@ -30,7 +30,7 @@ o['change'] = (c.c - c.o)/c.o
 
 # remove dates when STO is closed
 index_range = pd.bdate_range(
-            end=pd.datetime(2018, 5, 23),
+            end=pd.datetime(2018, 5, 31),
             periods=n_lags,
             freq='C',
             holidays=get_trading_close_holidays(2018)

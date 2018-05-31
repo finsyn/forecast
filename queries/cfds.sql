@@ -19,7 +19,7 @@ FROM
 INNER JOIN (
   SELECT
     # we might have duplicates, if so  want the latest added value
-    first_value(close) over (partition by service_id, date order by created_at desc) as newestClose,
+    first_value(open) over (partition by service_id, date order by created_at desc) as newestClose,
     *
     FROM `notifications.quotes`
     WHERE format_timestamp("%H:%M", date, "Europe/Stockholm") = '17:00'

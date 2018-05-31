@@ -39,7 +39,11 @@ def load_indicators(df):
 
     for s_id in quotes:
 
-        c = df.loc[df['id'] == s_id]['c']
+        data = df.loc[df['id'] == s_id]
+        c = data['c']
+        h = data['h']
+        l = data['l']
+
         open = df.loc[df['id'] == s_id]['o']
         o = DataFrame()
         o['ma5'] = ma(5, c)
@@ -50,6 +54,9 @@ def load_indicators(df):
         o['asy3'] = asy(3, c) 
         o['asy2'] = asy(2, c)
         o['asy1'] = asy(1, c)
+        # homemade volatility feature
+        o['ma5hl'] = rlog(l, h)
+
 
         cols.append(o)
         names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
@@ -218,7 +225,7 @@ def load_features():
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
     # We only want days when stockholm stock exchange is open
     start = datetime(2017, 5, 29)
-    end = datetime(2018, 5, 25)
+    end = datetime(2018, 5, 31)
     index_range = bdate_range(
             start,
             end,

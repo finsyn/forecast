@@ -11,7 +11,7 @@ from keras.models import Input, Model
 from keras.layers import LSTM, Dense, BatchNormalization, Activation, Dropout, Embedding, merge
 from keras.layers.core import *
 from keras.utils import to_categorical
-from keras.optimizers import Adam
+from keras.optimizers import Adam, SGD
 from keras.backend import argmax
 
 from matplotlib import pyplot
@@ -23,7 +23,7 @@ dataset = read_csv('data/training.csv', header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 1000
+n_epochs = 300
 train_split = 1.0
 target = 'target'
 
@@ -54,7 +54,7 @@ def omxmodel (n_features, n_values):
 
     inputs = Input(shape=(n_features,))
 
-    X = Dense(units=10, activation='relu')(inputs)
+    X = Dense(units=5, activation='relu')(inputs)
     predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -69,11 +69,13 @@ model = omxmodel(n_features, n_output)
 
 print(model.summary())
 
+optimizer = SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=True)
+
 # build network
 model.compile(
         loss='binary_crossentropy',
         metrics=['accuracy'],
-        optimizer='sgd')
+        optimizer=optimizer)
 
 # fit network
 history = model.fit(
