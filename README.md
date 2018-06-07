@@ -1,20 +1,16 @@
-# OMX30 forecasting
+# OMX30 Index CFD forecasting
 
-An attempt to guess if OMX30 will go up or down tomorrow based on historical patterns.
+An attempt to guess if OMX30 CFD:s will go up or down tomorrow based on historical patterns.
 
-The model is very simple in order to avoid overfitting and takes the following features as input:
+The model is based on the paper [Predicting the Direction of Stock Market Index Movement Using an Optimized Artificial Neural Network Model] by Mingyue Qiu and Yu Song but uses Keras built
+in stochastic gradient descent optimizer instead of the genetic algorithm based one used in the paper.
 
-  - up/down for 19 global stock market indexes (including the OMX30 itself) starting from 2012 in trading day frequency
+The model uses a bunch of techinical analysis features from the index as input which is fed to small neural network. It outputs probabilities for OMX30 CFD:s going down or up the following day.
 
-A one layer LSTM model with only one unit is used. To make a prediction it is fed a one year long sequence of the input features. It outputs probabilities for OMX30 going down or up the following day.
+Currently the biggest limitation is that we only have CFD data for one year.
 
 ## Result
-When training on 80% of the data from 2014 and forward up until today it had 60% accuracy on the remaining 20%. Assuming up and down being just as likely that gives a p-value of less than 0.05
-
-![training loss plot](plots/loss.png "training loss")
-
-Keep in mind though that this result hasn't been thoroughly confirmed yet and that the historical patterns of the stock market can very well change in nature in the future of unknowns.
-
+The test sample that one year of data gives us is currently too small to draw any meaningful conclusions of the model's performance.
 
 ## Usage
 My side project [Finsyn](https://app.finsyn.se) currently runs this on GAE in a opt-in alpha :)
@@ -22,7 +18,7 @@ My side project [Finsyn](https://app.finsyn.se) currently runs this on GAE in a 
 ![screenshot from finsyn](plots/demo.png "experimental usage")
 
 ### IG CFD trading
-The model has been used to conduct real trades of OMX30-SEK20 CFD:s on ig.com. 
+The model has been used to conduct real trades of OMX30-SEK20 CFD:s on ig.com.
 
 Unfortunately I have noticed that the opening price I get on IG CFD on market opening
 doesn't match what is advertised by Yahoo Finance (which seems to match Nasdaq).
@@ -42,10 +38,12 @@ freq       200
 
 Opening prices during the same timespan differed about 4 points on average with a median of 3.
 
+Altogether this made me move from trying to predict OMX30 to predicting the OMX30 CFD instead.
+
 ## Requirements
- - python 2.7 
+ - python 2.7
  - keras, pandas, matplotlib, scikitlearn, docker etc.
- - *training data that hopefully will be made available soon* 
+ - *training data that hopefully will be made available soon*
 
 ## Development
 TBD
@@ -56,4 +54,4 @@ TBD
 - [Multivariate Time Series Forecasting with LSTMs in Keras](https://machinelearningmastery.com/multivariate-time-series-forecasting-lstms-keras/) by Jason Brownlee
 - [Deep Learning the Stock Market](https://medium.com/@TalPerry/deep-learning-the-stock-market-df853d139e02) by Tal Perry
 - [On stock return prediction with LSTM networks](http://lup.lub.lu.se/luur/download?func=downloadFile&recordOId=8911069&fileOId=8911070) by Magnus Hansson
-
+- [Predicting the Direction of Stock Market Index Movement Using an Optimized Artificial Neural Network Model](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4873195/)
