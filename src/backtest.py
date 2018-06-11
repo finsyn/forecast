@@ -30,7 +30,7 @@ o['change'] = (c.c - c.o)/c.o
 
 # remove dates when STO is closed
 index_range = pd.bdate_range(
-            end=pd.datetime(2018, 5, 31),
+            end=pd.datetime(2018, 6, 10),
             periods=n_lags,
             freq='C',
             holidays=get_trading_close_holidays(2018)

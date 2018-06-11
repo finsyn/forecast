@@ -225,7 +225,7 @@ def load_features():
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
     # We only want days when stockholm stock exchange is open
     start = datetime(2017, 5, 29)
-    end = datetime(2018, 5, 31)
+    end = datetime(2018, 6, 10)
     index_range = bdate_range(
             start,
             end,
