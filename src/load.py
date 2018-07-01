@@ -199,7 +199,7 @@ def get_trading_close_holidays(country_code):
     }
     return holidays[country_code](2018)
 
-def load_features(service_id, country_code):
+def load_features(service_id, country_code, date_from, date_to):
     df_cfds_raw = read_data_csv('data/%s.csv' % service_id)
     df_indicators = load_indicators(df_cfds_raw)
 
@@ -210,8 +210,8 @@ def load_features(service_id, country_code):
     # period of interest
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
     # We only want days when market of target security/index is open
-    start = datetime(2017, 6, 30)
-    end = datetime(2018, 6, 29)
+    start = to_datetime(date_from)
+    end = to_datetime(date_to)
     index_range = bdate_range(
             start,
             end,
