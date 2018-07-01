@@ -191,41 +191,19 @@ def add_calendar_events(df):
     # df['isMonthStart'] = (df.index.is_month_end).astype(int)
     # df['isQuarterStart'] = (df.index.is_quarter_start).astype(int)
 
-def load_features():
-    df_indexes_raw = read_data_csv('data/indexes.csv')
-    df_cfds_raw = read_data_csv('data/cfds.csv')
-    df_groups_raw = read_data_csv('data/groups.csv')
-    df_shorts_raw = read_data_csv('data/shorts.csv')
-    df_insiders_raw = read_data_csv('data/insiders.csv')
-    df_commodities_raw = read_data_csv('data/commodities.csv')
-   
-    df_indexes = load_quotes_daily(df_indexes_raw)
-    df_cfds = load_quotes_daily(df_cfds_raw)
-    df_groups = load_groups(df_groups_raw)
-    df_shorts = load_shorts(df_shorts_raw)
-    df_insiders = load_insiders(df_insiders_raw)
-    df_commodities = load_commodities(df_commodities_raw)
+def load_features(service_id):
+    df_cfds_raw = read_data_csv('data/%s.csv' % service_id)
     df_indicators = load_indicators(df_cfds_raw)
-    df_volume = load_volume(
-        df_indexes_raw.loc[df_indexes_raw['id'] == 'market-index_SP500']
-    )
-    df_indicators_long = load_indicators(
-        df_indexes_raw.loc[df_indexes_raw['id'] == 'market-index_OMX30']
-    )
-    df_target_long = load_target(
-        df_indexes_raw.loc[df_indexes_raw['id'] == 'market-index_OMX30']
-    )
 
-    df_target = load_target(df_cfds_raw.loc[df_cfds_raw['id'] == 'cfd_OMX30-20SEK-HOUR'])
-    df_target_yahoo = load_target(df_indexes_raw.loc[df_indexes_raw['id'] == 'market-index_OMX30'])
+    df_target = load_target(df_cfds_raw)
 
     df = concat([df_indicators, df_target], axis=1, join='outer')
 
     # period of interest
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
-    # We only want days when stockholm stock exchange is open
+    # We only want days when market of target security/index is open
     start = datetime(2017, 5, 29)
-    end = datetime(2018, 6, 10)
+    end = datetime(2018, 6, 29)
     index_range = bdate_range(
             start,
             end,
@@ -239,6 +217,6 @@ def load_features():
 
     scaler = preprocessing.MinMaxScaler()
     df[df_indicators.columns] = scaler.fit_transform(df[df_indicators.columns])
-    joblib.dump(scaler, 'scaler.save')
+    joblib.dump(scaler, 'outputs/%s-scaler.save' % service_id)
 
     return df

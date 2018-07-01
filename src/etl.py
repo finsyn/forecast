@@ -1,24 +1,19 @@
 from load import load_features
 from extract import query
 from pandas import concat
+from os import environ
 
-# indexes = query('queries/indexes.sql')
-# indexes.to_csv('data/indexes.csv')
+id = environ['TARGET_CFD_ID']
 
-cfds = query('queries/cfds.sql')
-cfds.to_csv('data/cfds.csv')
+cfd_opt = {
+    'service_id': id,
+    'timezone': environ['TIMEZONE'],
+    'time_from': environ['TIME_FROM'],
+    'time_to': environ['TIME_TO']
+}
 
-# commodities = query('queries/commodities.sql')
-# commodities.to_csv('data/commodities.csv')
+cfds = query('queries/cfds.sql', cfd_opt)
+cfds.to_csv('data/%s.csv' % id)
 
-# groups = query('queries/groups.sql')
-# groups.to_csv('data/groups.csv')
-
-# shorts = query('queries/shorts.sql')
-# shorts.to_csv('data/shorts.csv')
-
-# insiders = query('queries/insiders.sql')
-# insiders.to_csv('data/insiders.csv')
-
-features = load_features()
-features.to_csv('data/training.csv')
+features = load_features(id)
+features.to_csv('data/%s-feat.csv' % id)
