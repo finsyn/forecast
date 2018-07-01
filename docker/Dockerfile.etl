@@ -1,0 +1,13 @@
+FROM python 
+
+WORKDIR /opt/forecaster/ 
+
+RUN pip install \
+      pandas \
+      pandas-gbq \
+      scipy \
+      sklearn
+
+ENV GOOGLE_APPLICATION_CREDENTIALS /opt/forecaster/key.json
+
+ENTRYPOINT ["python"]

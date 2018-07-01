@@ -2,13 +2,25 @@ version: '3'
 services:
   etl:
     build: 
-      dockerfile: docker/Dockerfile.loader 
+      dockerfile: docker/Dockerfile.etl 
       context: .
-    environment:
-      TARGET_CFD_ID: 'cfd_OMX30-20SEK-HOUR'
-      TIMEZONE: 'Europe/Stockholm'
-      TIME_FROM: '09:00'
-      TIME_TO: '17:00'
+    env_file: ./targets/${TARGET}.env
     command: src/etl.py
+    volumes:
+      - ./:/opt/forecaster/
+  train:
+    build: 
+      dockerfile: docker/Dockerfile.train
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/train_nn.py
+    volumes:
+      - ./:/opt/forecaster/
+  view:
+    build: 
+      dockerfile: docker/Dockerfile.view
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/visualize.py
     volumes:
       - ./:/opt/forecaster/

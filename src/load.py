@@ -3,7 +3,8 @@ import numpy as np
 from technical import asy, rlog, ma, psy
 from sklearn import preprocessing
 from sklearn.externals import joblib
-from sweholidays import get_trading_close_holidays
+import holidaysswe
+import holidayshk
 
 def read_data_csv(csvfile):
     df = read_csv(
@@ -191,7 +192,14 @@ def add_calendar_events(df):
     # df['isMonthStart'] = (df.index.is_month_end).astype(int)
     # df['isQuarterStart'] = (df.index.is_quarter_start).astype(int)
 
-def load_features(service_id):
+def get_trading_close_holidays(country_code):
+    holidays = {
+        'HK': holidayshk.get_trading_close_holidays,
+        'SE': holidaysswe.get_trading_close_holidays
+    }
+    return holidays[country_code](2018)
+
+def load_features(service_id, country_code):
     df_cfds_raw = read_data_csv('data/%s.csv' % service_id)
     df_indicators = load_indicators(df_cfds_raw)
 
@@ -202,13 +210,13 @@ def load_features(service_id):
     # period of interest
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
     # We only want days when market of target security/index is open
-    start = datetime(2017, 5, 29)
+    start = datetime(2017, 6, 30)
     end = datetime(2018, 6, 29)
     index_range = bdate_range(
             start,
             end,
             freq='C',
-            holidays=get_trading_close_holidays(2018)
+            holidays=get_trading_close_holidays(country_code)
             )
     df = df.reindex(index_range)
 

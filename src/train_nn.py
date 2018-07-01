@@ -4,6 +4,7 @@ from pandas import read_csv
 from scipy.stats import binom_test
 from performance import confident_precision
 from parse import get_train_data
+from os import environ
 
 np.random.seed(1337)
 
@@ -14,17 +15,17 @@ from keras.utils import to_categorical
 from keras.optimizers import Adam, SGD
 from keras.backend import argmax
 
-from matplotlib import pyplot
-
 from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
 
-dataset = read_csv('data/training.csv', header=0, index_col=0)
+id = environ['TARGET_CFD_ID']
+
+dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
 n_epochs = 300
-train_split = 1.0
+train_split = 0.8
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -90,14 +91,13 @@ if result:
     print('Test set mean absolute error: %s' % result[1])
 
 # save model
-model.save('model.h5')
+model.save('outputs/%s-model.h5' % id)
 
-# plot history
-pyplot.figure()
-pyplot.subplot(2, 1, 1)
-pyplot.plot(history.history['loss'], label='train')
-pyplot.plot(history.history['val_loss'], label='test')
-pyplot.legend()
+# save history
+np.savetxt(
+        "data/%s-results.csv" % id,
+        np.asarray([ history.history['loss'], history.history['val_loss']]),
+        delimiter=",")
 
 test_y_prob = model.predict(test_X)
 
@@ -111,7 +111,7 @@ print(binom_test(np.sum(test_y == test_y_pred), len(test_y)))
 
 # save test output for simulations etc.
 np.savetxt(
-        "data/test-output.csv",
+        "data/%s-test-output.csv" % id,
         np.asarray([ test_y_pred, test_y ]),
         delimiter=",")
 
@@ -131,5 +131,3 @@ print(confidence)
 print('Test set confident accuracy: %s' % acc_confident)
 print(confusion_matrix(test_y_conf_real, test_y_conf_pred))
 print('Test set confident p-value: %s' % p_val_confident)
-
-pyplot.show()

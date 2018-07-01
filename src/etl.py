@@ -4,6 +4,7 @@ from pandas import concat
 from os import environ
 
 id = environ['TARGET_CFD_ID']
+cc = environ['TARGET_COUNTRY']
 
 cfd_opt = {
     'service_id': id,
@@ -15,5 +16,5 @@ cfd_opt = {
 cfds = query('queries/cfds.sql', cfd_opt)
 cfds.to_csv('data/%s.csv' % id)
 
-features = load_features(id)
+features = load_features(id, cc)
 features.to_csv('data/%s-feat.csv' % id)

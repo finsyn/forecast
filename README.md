@@ -41,12 +41,27 @@ Opening prices during the same timespan differed about 4 points on average with 
 Altogether this made me move from trying to predict OMX30 to predicting the OMX30 CFD instead.
 
 ## Requirements
- - python 2.7
- - keras, pandas, matplotlib, scikitlearn, docker etc.
- - *training data that hopefully will be made available soon*
+ - Docker
+ - Docker Compose
+ - GCP service account private key file to access BigQuery tables
 
 ## Development
-TBD
+*currently only possible if you have received a GCP service account*
+
+### Extract Transform and Load data
+```
+docker-compose run etl
+```
+
+### Train network 
+```
+docker-compose run train
+```
+
+### Visualize features 
+```
+docker-compose run view
+```
 
 ## References
 

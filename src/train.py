@@ -22,7 +22,7 @@ from sklearn.metrics import confusion_matrix
 dataset = read_csv('data/training.csv', header=0, index_col=0)
 
 n_features = dataset.shape[1]
-n_lags = 3 
+n_lags = 8 
 n_output = 2
 n_epochs = 1000
 train_split = 0.8
@@ -89,7 +89,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y_oh,
-        epochs=n_epochs, batch_size=2,
+        epochs=n_epochs, batch_size=32,
         validation_data=(test_X, test_y_oh),
         shuffle=False)
 

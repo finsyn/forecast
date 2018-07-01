@@ -7,10 +7,10 @@ from matplotlib import pyplot
 
 leverage_long = 1
 leverage_ava = 8
-leverage_ig = 20
+leverage_ig = 10
 ig_stop_limit = 5
 
-cap_init = 3000
+cap_init = 1500
 
 res = np.genfromtxt('data/test-output.csv', delimiter=',')
 y_h = res[0]
