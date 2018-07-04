@@ -24,8 +24,8 @@ dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 300
-train_split = 0.8
+n_epochs = 1000
+train_split = 0.7
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -81,7 +81,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y_oh,
-        epochs=n_epochs, batch_size=1,
+        epochs=n_epochs, batch_size=4,
         validation_data=(test_X, test_y_oh),
         shuffle=False)
 

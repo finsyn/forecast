@@ -13,7 +13,7 @@ services:
       dockerfile: docker/Dockerfile.train
       context: .
     env_file: ./targets/${TARGET}.env
-    command: src/train_nn.py
+    command: src/train_svm.py
     volumes:
       - ./:/opt/forecaster/
   view:

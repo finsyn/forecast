@@ -10,9 +10,10 @@ def query_from_file(filename):
         query=file.read()
     return query
 
-def query(filename, opt):
+def query(filename, opt={}):
     query_string_tmpl = query_from_file(filename)
     query_string = query_string_tmpl.format(**opt)
+
     return pandas_gbq.read_gbq(
             query_string,
             projectid,

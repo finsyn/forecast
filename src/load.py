@@ -130,6 +130,7 @@ def load_quotes_daily(df):
         o = DataFrame()
 
         o['up'] = (rlog(c.o,c.c) > 0.0).astype(int)
+        o['rlog'] = rlog(c.o,c.c)
         # o['psy12'] = psy(12, c.c)
         # o['asy1'] = asy(1, c.c)
         # o['bigdiff'] = (abs(rlog(c.o,c.c) > 0.01)).astype(int)
@@ -185,12 +186,14 @@ def load_shorts(df):
 
     return agg
 
-def add_calendar_events(df):
+def load_calendar_events(df):
     # a column for market opening awareness 
-    df['isMonday'] = (df.index.weekday == 0).astype(int)
-    df['isFriday'] = (df.index.weekday == 4).astype(int)
-    # df['isMonthStart'] = (df.index.is_month_end).astype(int)
-    # df['isQuarterStart'] = (df.index.is_quarter_start).astype(int)
+    o = DataFrame()
+    o['isMonday'] = (df.index.weekday == 0).astype(int)
+    o['isFriday'] = (df.index.weekday == 4).astype(int)
+    o.index = df.index
+
+    return o
 
 def get_trading_close_holidays(country_code):
     holidays = {
@@ -200,8 +203,13 @@ def get_trading_close_holidays(country_code):
     return holidays[country_code](2018)
 
 def load_features(service_id, country_code, date_from, date_to):
+
     df_cfds_raw = read_data_csv('data/%s.csv' % service_id)
     df_indicators = load_indicators(df_cfds_raw)
+
+    df_indexes_raw = read_data_csv('data/indexes.csv')
+    df_indexes = load_quotes_daily(df_indexes_raw)
+    df_calendar_events = load_calendar_events(df_cfds_raw)
 
     df_target = load_target(df_cfds_raw)
 
@@ -220,11 +228,16 @@ def load_features(service_id, country_code, date_from, date_to):
             )
     df = df.reindex(index_range)
 
-    df = df.interpolate()
     df = df[12:]
+
+    print('[INFO] these features contains NaN entries')
+    print(df.isna().sum())
+
+    df = df.interpolate()
 
     scaler = preprocessing.MinMaxScaler()
     df[df_indicators.columns] = scaler.fit_transform(df[df_indicators.columns])
+    # df[df_indexes.columns] = scaler.fit_transform(df[df_indexes.columns])
     joblib.dump(scaler, 'outputs/%s-scaler.save' % service_id)
 
     return df
