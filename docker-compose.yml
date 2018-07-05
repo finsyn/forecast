@@ -10,7 +10,7 @@ services:
       - ./:/opt/forecaster/
   train:
     build: 
-      dockerfile: docker/Dockerfile.train
+      dockerfile: docker/Dockerfile.scikit
       context: .
     env_file: ./targets/${TARGET}.env
     command: src/train_svm.py

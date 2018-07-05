@@ -39,6 +39,9 @@ INNER JOIN (
 ) extremeQuotes
 on format_timestamp("%F", closeQuotes.date) = format_timestamp("%F", extremeQuotes.date)
 
+WHERE
+ /* missing this for some NIKKEI days */
+ extremeQuotes.newestLowest > 0.0
 GROUP BY
   date,
   id,
