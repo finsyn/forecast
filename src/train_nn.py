@@ -13,8 +13,10 @@ from keras.layers import LSTM, Dense, BatchNormalization, Activation, Dropout, E
 from keras.layers.core import *
 from keras.utils import to_categorical
 from keras.optimizers import Adam, SGD
+
 from keras.backend import argmax
 
+from sklearn.feature_selection import SelectKBest, chi2, f_classif
 from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
 
@@ -24,8 +26,8 @@ dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 1000
-train_split = 0.7
+n_epochs = 300
+train_split = 0.8
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -35,9 +37,17 @@ print(dataset)
 values = dataset.values
 
 X = values[:-1,:-1]
-print(X)
 Y = values[1:,-1]
-print(Y)
+
+# Only use the best features
+n_features = 4
+f_select = SelectKBest(f_classif, k=n_features)
+X = f_select.fit_transform(X, Y)
+f_top_idx = np.argsort(f_select.scores_)[-n_features:]
+f_top = np.take(dataset.columns.values, f_top_idx)
+
+print('### Selected features')
+print('\n'.join(f_top))
 
 # make target column boolean
 Y = Y > 0.0
@@ -55,7 +65,8 @@ def omxmodel (n_features, n_values):
 
     inputs = Input(shape=(n_features,))
 
-    X = Dense(units=5, activation='relu')(inputs)
+    X = Dense(units=6, activation='relu')(inputs)
+    X = Dense(units=3, activation='relu')(X)
     predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)

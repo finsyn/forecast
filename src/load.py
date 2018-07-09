@@ -42,12 +42,10 @@ def load_indicators(df):
 
         data = df.loc[df['id'] == s_id]
         c = data['c']
-        h = data['h']
-        l = data['l']
 
-        open = df.loc[df['id'] == s_id]['o']
         o = DataFrame()
         o['ma5'] = ma(5, c)
+        o['ma12'] = ma(12, c)
         o['bias6'] = (c - ma(6, c)) / ma(6, c)
         o['psy12'] = psy(12, c)
         o['asy5'] = asy(5, c)
@@ -55,85 +53,14 @@ def load_indicators(df):
         o['asy3'] = asy(3, c) 
         o['asy2'] = asy(2, c)
         o['asy1'] = asy(1, c)
+
         # homemade volatility feature
-        o['ma5hl'] = rlog(l, h)
+        # high/low not always available in dataset
+        if ('h' in data.columns):
+            h = data['h']
+            l = data['l']
+            o['ma5hl'] = rlog(l, h)
 
-
-        cols.append(o)
-        names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
-
-    agg = concat(cols, axis=1)
-    agg.columns = names
-
-    agg.index.name = 'date'
-    return agg 
-
-def load_commodities(df):
-    commodities = list(set(df['id'].values))
-
-    print('loading daily commodities for %s entities' % len(commodities))
-    
-    cols, names = list(), list()
-
-    for s_id in commodities:
-
-        c = df.loc[df['id'] == s_id]
-        o = DataFrame()
-        o['up'] = (rlog(c['c'].shift(1),c['c']) > 0.0).astype(int)
-
-        cols.append(o)
-        names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
-
-    agg = concat(cols, axis=1)
-    agg.columns = names
-
-    agg.index.name = 'date'
-    return agg 
-
-    return df
-
-def load_groups(df):
-    securities = list(set(df['id'].values))
-
-    # securities = ['market-index_OMX30', 'market-index_VIX']
-    print('loading daily quotes for %s entities' % len(securities))
-    
-    cols, names = list(), list()
-
-    for s_id in securities:
-
-        c = df.loc[df['id'] == s_id]
-        o = DataFrame()
-        o['numDown'] = np.log(1+c.numDown)
-        o['volume'] = np.log(1+c.volume)
-        cols.append(o)
-        names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
-
-    agg = concat(cols, axis=1)
-    agg.columns = names
-
-    agg.index.name = 'date'
-    return agg 
-
-
-def load_quotes_daily(df):
-    securities = list(set(df['id'].values))
-
-    # securities = ['market-index_OMX30']
-    print('loading daily quotes for %s entities' % len(securities))
-    
-    cols, names = list(), list()
-
-    for s_id in securities:
-
-        c = df.loc[df['id'] == s_id]
-        o = DataFrame()
-
-        o['up'] = (rlog(c.o,c.c) > 0.0).astype(int)
-        o['rlog'] = rlog(c.o,c.c)
-        # o['psy12'] = psy(12, c.c)
-        # o['asy1'] = asy(1, c.c)
-        # o['bigdiff'] = (abs(rlog(c.o,c.c) > 0.01)).astype(int)
         cols.append(o)
         names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
 
@@ -195,6 +122,33 @@ def load_calendar_events(df):
 
     return o
 
+def load_quotes_daily(df):
+    securities = list(set(df['id'].values))
+
+    # securities = ['market-index_OMX30']
+    print('loading daily quotes for %s entities' % len(securities))
+    
+    cols, names = list(), list()
+
+    for s_id in securities:
+
+        c = df.loc[df['id'] == s_id]
+        o = DataFrame()
+
+        # o['up'] = (rlog(c.o,c.c) > 0.0).astype(int)
+        o['rlog'] = rlog(c.o,c.c)
+        # o['psy12'] = psy(12, c.c)
+        # o['asy1'] = asy(1, c.c)
+        # o['bigdiff'] = (abs(rlog(c.o,c.c) > 0.01)).astype(int)
+        cols.append(o)
+        names += [('%s-%s' % (s_id, col_name)) for col_name in o.columns.values]
+
+    agg = concat(cols, axis=1)
+    agg.columns = names
+ 
+    agg.index.name = 'date'
+    return agg 
+
 def get_trading_close_holidays(country_code):
     holidays = {
         'HK': holidayshk.get_trading_close_holidays,
@@ -208,12 +162,15 @@ def load_features(service_id, country_code, date_from, date_to):
     df_indicators = load_indicators(df_cfds_raw)
 
     df_indexes_raw = read_data_csv('data/indexes.csv')
-    df_indexes = load_quotes_daily(df_indexes_raw)
+    df_indexes = load_indicators(df_indexes_raw)
     df_calendar_events = load_calendar_events(df_cfds_raw)
+
+    df_commodities_raw = read_data_csv('data/commodities.csv')
+    df_commodities = load_indicators(df_commodities_raw)
 
     df_target = load_target(df_cfds_raw)
 
-    df = concat([df_indicators, df_target], axis=1, join='outer')
+    df = concat([df_indicators, df_indexes, df_commodities, df_target], axis=1, join='outer')
 
     # period of interest
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
@@ -232,12 +189,15 @@ def load_features(service_id, country_code, date_from, date_to):
 
     print('[INFO] these features contains NaN entries')
     print(df.isna().sum())
+    # df = df.dropna()
 
     df = df.interpolate()
 
     scaler = preprocessing.MinMaxScaler()
+    # scaler = preprocessing.StandardScaler()
     df[df_indicators.columns] = scaler.fit_transform(df[df_indicators.columns])
-    # df[df_indexes.columns] = scaler.fit_transform(df[df_indexes.columns])
+    df[df_commodities.columns] = scaler.fit_transform(df[df_commodities.columns])
+    df[df_indexes.columns] = scaler.fit_transform(df[df_indexes.columns])
     joblib.dump(scaler, 'outputs/%s-scaler.save' % service_id)
 
     return df

@@ -18,14 +18,15 @@ AND
     # global commodities
     'commodity_butane',
     'commodity_oil-brent',
-    'commodity_wld-itimber',
+    /* 'commodity_wld-itimber', */
+    'commodity_cme-lb2',
     'commodity_copper',
     'commodity_fe-tjn',
     'commodity_al-lme'
   )
 )
 AND
-  date > TIMESTAMP "2010-01-01"
+  date > TIMESTAMP "2012-01-01"
 GROUP BY
   date,
   id,

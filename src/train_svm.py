@@ -3,9 +3,10 @@ from __future__ import division
 import numpy as np
 import sys
 from pandas import read_csv
-from scipy.stats import binom_test, expon, chi
+from scipy.stats import binom_test, expon, chi, gamma
 from os import environ
 
+from sklearn.feature_selection import SelectKBest, chi2, f_classif
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC
@@ -30,6 +31,16 @@ values = dataset.values
 X = values[:-1,:-1]
 Y = values[1:,-1]
 
+# Only use the best features
+f_n = 4 
+f_select = SelectKBest(f_classif, k=f_n)
+X = f_select.fit_transform(X, Y)
+f_top_idx = np.argsort(f_select.scores_)[-f_n:]
+f_top = np.take(dataset.columns.values, f_top_idx)
+
+print('### Selected features')
+print('\n'.join(f_top))
+
 # make target column boolean
 Y = Y > 0.0
 print('market going up   %s times in dataset' % np.sum(Y))
@@ -47,10 +58,10 @@ models = []
 all_pred = np.zeros((len(test_y), n_models))
 print('### Finding %s models' % n_models)
 for i in range(0, n_models):
-    # C_candidates = expon.rvs(size=10, scale=100)
-    C_candidates = np.random.uniform(0.0, 1e9, 10)
-    # g_candidates = expon.rvs(size=10, scale=0.0001)
-    g_candidates = np.random.uniform(1e-10, 0.0, 10) 
+    rC = np.random.rand() + 8
+    rg = np.random.rand() + 8 
+    C_candidates = expon.rvs(size=10, scale=np.power(10,rC))
+    g_candidates = expon.rvs(size=10, scale=np.power(10,-rg))
 
     param_grid = [
         {'C': C_candidates, 'gamma': g_candidates, 'class_weight': ['balanced', None], 'kernel': ['rbf']}
@@ -58,8 +69,9 @@ for i in range(0, n_models):
 
     clf = GridSearchCV(
         SVC(
-            tol=1e-3,
-            shrinking=True,
+            tol=1e-4,
+            # shrinking=True,
+            max_iter=1e7,
             verbose=False
         ),
         param_grid,
@@ -74,10 +86,11 @@ for i in range(0, n_models):
 
     models.append(clf)
 
-
-print(all_pred)
 # Get mean prediction of all models per sample
-pred = (np.mean(all_pred, -1) > 0.5).astype(int)
+pred_prob = np.mean(all_pred, -1)
+print('### Probabilites on test set')
+print(pred_prob)
+pred = (pred_prob > 0.5).astype(int)
 print('### Predictions on test set')
 print(test_y.astype(int))
 print(pred)

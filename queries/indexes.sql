@@ -25,10 +25,10 @@ AND
 (
   quotes.service_id IN (
     # global markets
-    /* 'market-index_AEX', */
-    /* 'market-index_CBOE', */
-    /* 'market-index_DJI', */
-    /* 'market-index_EURONEXT', */
+    'market-index_AEX',
+    'market-index_CBOE',
+    'market-index_DJI',
+    'market-index_EURONEXT',
     'market-index_FTSE',
     /* 'market-index_GDAXI', */
     /* issues to get opening prices on these from the daily job */     
@@ -76,7 +76,7 @@ AND
     # currencies */
     /* 'market-index_SEKUSD', */
     /* 'market-index_CNYUSD', */
-    /* 'market-index_JPYUSD' */
+    /* 'market-index_JPYUSD', */
     /* 'market-index_GBPUSD' */
   )
 )

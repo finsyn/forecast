@@ -16,6 +16,14 @@ services:
     command: src/train_svm.py
     volumes:
       - ./:/opt/forecaster/
+  train-nn:
+    build: 
+      dockerfile: docker/Dockerfile.train
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/train_nn.py
+    volumes:
+      - ./:/opt/forecaster/
   view:
     build: 
       dockerfile: docker/Dockerfile.view

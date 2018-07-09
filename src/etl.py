@@ -21,5 +21,8 @@ cfds.to_csv('data/%s.csv' % id)
 indexes = query('queries/indexes.sql')
 indexes.to_csv('data/indexes.csv')
 
+commodities = query('queries/commodities.sql')
+commodities.to_csv('data/commodities.csv')
+
 features = load_features(id, cc, load_from, load_to)
 features.to_csv('data/%s-feat.csv' % id)
