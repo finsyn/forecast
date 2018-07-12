@@ -21,13 +21,14 @@ from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
 
 id = environ['TARGET_CFD_ID']
+n_top_features = int(environ['TRAIN_FEATURES'])
 
 dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 300
-train_split = 0.8
+n_epochs = 1000
+train_split = 0.7
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -40,7 +41,7 @@ X = values[:-1,:-1]
 Y = values[1:,-1]
 
 # Only use the best features
-n_features = 4
+n_features = n_top_features
 f_select = SelectKBest(f_classif, k=n_features)
 X = f_select.fit_transform(X, Y)
 f_top_idx = np.argsort(f_select.scores_)[-n_features:]
@@ -82,6 +83,7 @@ model = omxmodel(n_features, n_output)
 print(model.summary())
 
 optimizer = SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=True)
+optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 # build network
 model.compile(

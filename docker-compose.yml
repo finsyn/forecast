@@ -8,7 +8,7 @@ services:
     command: src/etl.py
     volumes:
       - ./:/opt/forecaster/
-  train:
+  train-svm:
     build: 
       dockerfile: docker/Dockerfile.scikit
       context: .
@@ -16,7 +16,7 @@ services:
     command: src/train_svm.py
     volumes:
       - ./:/opt/forecaster/
-  train-nn:
+  train:
     build: 
       dockerfile: docker/Dockerfile.train
       context: .

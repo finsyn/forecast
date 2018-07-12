@@ -12,6 +12,7 @@ from sklearn.metrics import classification_report
 from sklearn.svm import SVC
 
 id = environ['TARGET_CFD_ID']
+f_n = environ['TRAIN_FEATURES']
 
 dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
@@ -32,7 +33,6 @@ X = values[:-1,:-1]
 Y = values[1:,-1]
 
 # Only use the best features
-f_n = 4 
 f_select = SelectKBest(f_classif, k=f_n)
 X = f_select.fit_transform(X, Y)
 f_top_idx = np.argsort(f_select.scores_)[-f_n:]

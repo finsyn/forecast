@@ -76,8 +76,9 @@ def load_features(service_id, country_code, date_from, date_to):
 
     raw_files = [
         target_data_file,
-        'data/indexes.csv',
-        'data/commodities.csv'
+        'data/indexes.csv'
+        # unfortunately we dont have any daily reporting on quandl data
+        # 'data/commodities.csv'
     ]
 
     df_features = []
@@ -91,7 +92,7 @@ def load_features(service_id, country_code, date_from, date_to):
     df_target = load_target(read_data_csv(target_data_file))
 
     # join features and target dfs
-    df = concat([df_target] + df_features, axis=1, join='outer')
+    df = concat(df_features + [df_target], axis=1, join='outer')
 
     # period of interest
     # Be aware that yahoo only have open AND close price of OMX30 since 2009-01-01 
