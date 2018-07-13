@@ -4,7 +4,7 @@ from pandas import read_csv
 from scipy.stats import binom_test
 from performance import confident_precision
 from parse import get_train_data
-from os import environ
+from os import environ, getenv
 
 np.random.seed(1337)
 
@@ -22,13 +22,13 @@ from sklearn.metrics import confusion_matrix
 
 id = environ['TARGET_CFD_ID']
 n_top_features = int(environ['TRAIN_FEATURES'])
+train_split = float(getenv('TRAIN_RATIO', 0.7))
 
 dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 1000
-train_split = 0.7
+n_epochs = 10
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -105,6 +105,13 @@ if result:
 
 # save model
 model.save('outputs/%s-model.h5' % id)
+# save chosen features that are features in the trained model
+np.savetxt(
+        "outputs/%s-features.csv" % id,
+        np.column_stack((f_top, f_top_idx)),
+        delimiter=",",
+        fmt="%s")
+
 
 # save history
 np.savetxt(

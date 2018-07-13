@@ -25,7 +25,7 @@ def load_target(df):
 # Indicators from Mingyue Qiu and Yu Song
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4873195/#!po=48.9130
 def load_indicators(df):
-    quotes = list(set(df['id'].values))
+    quotes = sorted(list(set(df['id'].values)))
 
     print('loading daily technical indicators (type 2) for %s entities' % len(quotes))
     
@@ -117,8 +117,7 @@ def load_features(service_id, country_code, date_from, date_to):
 
     # scale all features
     scaler = preprocessing.MinMaxScaler()
-    for feature in df_features:
-        df[feature.columns] = scaler.fit_transform(df[feature.columns])
+    df.iloc[:,0:-1] = scaler.fit_transform(df.iloc[:,0:-1])
     joblib.dump(scaler, 'outputs/%s-scaler.save' % service_id)
 
     return df

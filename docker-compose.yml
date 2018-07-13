@@ -24,6 +24,24 @@ services:
     command: src/train_nn.py
     volumes:
       - ./:/opt/forecaster/
+  train-dist:
+    build: 
+      dockerfile: docker/Dockerfile.train
+      context: .
+    env_file: ./targets/${TARGET}.env
+    environment:
+      TRAIN_RATIO: 1.0
+    command: src/train_nn.py
+    volumes:
+      - ./:/opt/forecaster/
+  predict:
+    build: 
+      dockerfile: docker/Dockerfile.dist
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/predict.py
+    volumes:
+      - ./:/opt/forecaster/
   view:
     build: 
       dockerfile: docker/Dockerfile.view
