@@ -28,7 +28,7 @@ dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 10
+n_epochs = 2000
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -136,11 +136,11 @@ np.savetxt(
         delimiter=",")
 
 confidence = np.amax(test_y_prob*10,axis=1).astype(int)
-test_y_conf_pred = test_y_pred[confidence > 5]
-test_y_conf_real = test_y[confidence > 5]
+test_y_conf_pred = test_y_pred[confidence > 6]
+test_y_conf_real = test_y[confidence > 6]
 correct_confident = np.sum(test_y_conf_pred == test_y_conf_real)
 n_confident = len(test_y_conf_pred)
-acc_confident = correct_confident / n_confident
+acc_confident = float(correct_confident) / float(n_confident)
 p_val_confident = binom_test(correct_confident, n_confident)
 
 

@@ -27,6 +27,7 @@ def forecast(id, cc, cfd_opt):
                 holidays=get_trading_close_holidays(cc)
                 )
 
+    print(index_range)
     df = df.reindex(index_range)
 
     df = df.interpolate(limit_direction='both')
