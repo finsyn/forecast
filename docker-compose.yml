@@ -50,3 +50,11 @@ services:
     command: src/visualize.py
     volumes:
       - ./:/opt/forecaster/
+  publish:
+    build:
+      dockerfile: docker/Dockerfile.dist
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/service.py
+    volumes:
+      - ./:/opt/forecaster/
