@@ -11,7 +11,7 @@ RUN pip3 install \
 ENV TF_CPP_MIN_LOG_LEVEL 2
 ENV GOOGLE_APPLICATION_CREDENTIALS /opt/forecaster/key.json
 
-ADD src/ queries model.h5 scaler.save \
+ADD src/ queries \
       ./
 
 EXPOSE 8080
