@@ -3,7 +3,7 @@ steps:
     args: [
        'cp',
        # change this once a new, hopefully better model has been trained 
-       'gs://finsyn-ml-data/outputs/2018-07-01/*',
+       'gs://finsyn-ml-data/outputs/2018-07-22/*',
        './models'
        ]
   - name: 'gcr.io/cloud-builders/docker'
