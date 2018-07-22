@@ -2,9 +2,10 @@ steps:
   - name: 'gcr.io/cloud-builders/gsutil'
     args: [
        'cp',
+       '-r',
        # change this once a new, hopefully better model has been trained 
-       'gs://finsyn-ml-data/outputs/2018-07-22/*',
-       './outputs'
+       'gs://finsyn-ml-data/2018-07-22/',
+       './'
        ]
   - name: 'gcr.io/cloud-builders/docker'
     args: [
