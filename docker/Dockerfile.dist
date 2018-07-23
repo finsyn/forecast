@@ -17,4 +17,4 @@ COPY outputs ./outputs
 
 EXPOSE 8080
 ENTRYPOINT ["python3"]
-CMD ["service.py"]
+CMD ["src/service.py"]
