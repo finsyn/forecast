@@ -11,8 +11,9 @@ RUN pip3 install \
 ENV TF_CPP_MIN_LOG_LEVEL 2
 ENV GOOGLE_APPLICATION_CREDENTIALS /opt/forecaster/key.json
 
-ADD src/ queries \
-      ./
+COPY src ./src
+COPY queries ./queries
+COPY outputs ./outputs 
 
 EXPOSE 8080
 ENTRYPOINT ["python3"]
