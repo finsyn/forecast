@@ -58,3 +58,11 @@ services:
     command: src/service.py
     volumes:
       - ./:/opt/forecaster/
+  results:
+    build:
+      dockerfile: docker/Dockerfile.view
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/ig.py
+    volumes:
+      - ./:/opt/forecaster/
