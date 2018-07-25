@@ -4,6 +4,7 @@ from pandas import read_csv
 from scipy.stats import binom_test
 from performance import confident_precision
 from parse import get_train_data
+from os import environ, getenv
 
 np.random.seed(1337)
 
@@ -12,19 +13,22 @@ from keras.layers import LSTM, Dense, BatchNormalization, Activation, Dropout, E
 from keras.layers.core import *
 from keras.utils import to_categorical
 from keras.optimizers import Adam, SGD
+
 from keras.backend import argmax
 
-from matplotlib import pyplot
-
+from sklearn.feature_selection import SelectKBest, chi2, f_classif
 from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
 
-dataset = read_csv('data/training.csv', header=0, index_col=0)
+id = environ['TARGET_CFD_ID']
+n_top_features = int(environ['TRAIN_FEATURES'])
+train_split = float(getenv('TRAIN_RATIO', 0.7))
+
+dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 300
-train_split = 1.0
+n_epochs = 2000
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -34,9 +38,17 @@ print(dataset)
 values = dataset.values
 
 X = values[:-1,:-1]
-print(X)
 Y = values[1:,-1]
-print(Y)
+
+# Only use the best features
+n_features = n_top_features
+f_select = SelectKBest(f_classif, k=n_features)
+X = f_select.fit_transform(X, Y)
+f_top_idx = np.argsort(f_select.scores_)[-n_features:]
+f_top = np.take(dataset.columns.values, f_top_idx)
+
+print('### Selected features')
+print('\n'.join(f_top))
 
 # make target column boolean
 Y = Y > 0.0
@@ -54,7 +66,8 @@ def omxmodel (n_features, n_values):
 
     inputs = Input(shape=(n_features,))
 
-    X = Dense(units=5, activation='relu')(inputs)
+    X = Dense(units=6, activation='relu')(inputs)
+    X = Dense(units=3, activation='relu')(X)
     predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -70,6 +83,7 @@ model = omxmodel(n_features, n_output)
 print(model.summary())
 
 optimizer = SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=True)
+optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 # build network
 model.compile(
@@ -80,7 +94,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y_oh,
-        epochs=n_epochs, batch_size=1,
+        epochs=n_epochs, batch_size=4,
         validation_data=(test_X, test_y_oh),
         shuffle=False)
 
@@ -90,14 +104,20 @@ if result:
     print('Test set mean absolute error: %s' % result[1])
 
 # save model
-model.save('model.h5')
+model.save('outputs/%s-model.h5' % id)
+# save chosen features that are features in the trained model
+np.savetxt(
+        "outputs/%s-features.csv" % id,
+        np.column_stack((f_top, f_top_idx)),
+        delimiter=",",
+        fmt="%s")
 
-# plot history
-pyplot.figure()
-pyplot.subplot(2, 1, 1)
-pyplot.plot(history.history['loss'], label='train')
-pyplot.plot(history.history['val_loss'], label='test')
-pyplot.legend()
+
+# save history
+np.savetxt(
+        "data/%s-results.csv" % id,
+        np.asarray([ history.history['loss'], history.history['val_loss']]),
+        delimiter=",")
 
 test_y_prob = model.predict(test_X)
 
@@ -111,16 +131,16 @@ print(binom_test(np.sum(test_y == test_y_pred), len(test_y)))
 
 # save test output for simulations etc.
 np.savetxt(
-        "data/test-output.csv",
+        "data/%s-test-output.csv" % id,
         np.asarray([ test_y_pred, test_y ]),
         delimiter=",")
 
 confidence = np.amax(test_y_prob*10,axis=1).astype(int)
-test_y_conf_pred = test_y_pred[confidence > 5]
-test_y_conf_real = test_y[confidence > 5]
+test_y_conf_pred = test_y_pred[confidence > 6]
+test_y_conf_real = test_y[confidence > 6]
 correct_confident = np.sum(test_y_conf_pred == test_y_conf_real)
 n_confident = len(test_y_conf_pred)
-acc_confident = correct_confident / n_confident
+acc_confident = float(correct_confident) / float(n_confident)
 p_val_confident = binom_test(correct_confident, n_confident)
 
 
@@ -131,5 +151,3 @@ print(confidence)
 print('Test set confident accuracy: %s' % acc_confident)
 print(confusion_matrix(test_y_conf_real, test_y_conf_pred))
 print('Test set confident p-value: %s' % p_val_confident)
-
-pyplot.show()

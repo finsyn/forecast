@@ -2,18 +2,16 @@ steps:
   - name: 'gcr.io/cloud-builders/gsutil'
     args: [
        'cp',
-       'gs://finsyn-ml-data/models/model.h5',
-       'model.h5'
-       ]
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args: [
-       'cp',
-       'gs://finsyn-ml-data/models/scaler.save',
-       'scaler.save'
+       '-r',
+       # change this once a new, hopefully better model has been trained 
+       'gs://finsyn-ml-data/2018-07-22/*',
+       './'
        ]
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build',
+      '-f',
+      'docker/Dockerfile.dist',
       '-t',
       'eu.gcr.io/${PROJECT_ID}/${REPO_NAME}:${REVISION_ID}',
       '.'

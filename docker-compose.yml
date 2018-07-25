@@ -1,0 +1,60 @@
+version: '3'
+services:
+  etl:
+    build: 
+      dockerfile: docker/Dockerfile.etl 
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/etl.py
+    volumes:
+      - ./:/opt/forecaster/
+  train-svm:
+    build: 
+      dockerfile: docker/Dockerfile.scikit
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/train_svm.py
+    volumes:
+      - ./:/opt/forecaster/
+  train:
+    build: 
+      dockerfile: docker/Dockerfile.train
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/train_nn.py
+    volumes:
+      - ./:/opt/forecaster/
+  train-dist:
+    build: 
+      dockerfile: docker/Dockerfile.train
+      context: .
+    env_file: ./targets/${TARGET}.env
+    environment:
+      TRAIN_RATIO: 1.0
+    command: src/train_nn.py
+    volumes:
+      - ./:/opt/forecaster/
+  predict:
+    build: 
+      dockerfile: docker/Dockerfile.dist
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/predict.py
+    volumes:
+      - ./:/opt/forecaster/
+  view:
+    build: 
+      dockerfile: docker/Dockerfile.view
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/visualize.py
+    volumes:
+      - ./:/opt/forecaster/
+  publish:
+    build:
+      dockerfile: docker/Dockerfile.dist
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/service.py
+    volumes:
+      - ./:/opt/forecaster/

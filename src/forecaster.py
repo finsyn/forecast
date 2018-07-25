@@ -1,18 +1,22 @@
-from pandas import datetime, bdate_range, offsets, concat
+from pandas import datetime, bdate_range, offsets, concat, read_csv
 from extract import query
-from load import load_indicators, load_target
+from load import load_indicators, load_target, get_trading_close_holidays
 import numpy as np
 from keras.models import load_model
 from datetime import datetime, timedelta 
-from sweholidays import get_trading_close_holidays
 from sklearn import preprocessing
 from sklearn.externals import joblib
 
-def forecast(query_path):
-    quotes_df_raw = query(query_path)
-    quotes_df = load_indicators(quotes_df_raw)
+def forecast(id, cc, cfd_opt):
 
-    df = quotes_df 
+    cfds_raw = query('queries/cfds.sql', cfd_opt)
+    indexes_raw = query('queries/indexes.sql')
+
+    cfds = load_indicators(cfds_raw)
+    indexes = load_indicators(indexes_raw)
+
+    df = concat([cfds, indexes], axis=1, join='outer')
+
     # remove dates when STO is closed
     # up until yesterday since that is the last day from which
     # we have all data
@@ -20,21 +24,27 @@ def forecast(query_path):
                 end=datetime.now().date() - timedelta(1),
                 periods=1,
                 freq='C',
-                holidays=get_trading_close_holidays(2018)
+                holidays=get_trading_close_holidays(cc)
                 )
 
+    print(index_range)
     df = df.reindex(index_range)
 
     df = df.interpolate(limit_direction='both')
 
-    print(df)
-    model = load_model('model.h5')
-    sample = df.values
-
     # normalize values
-    scaler = joblib.load('scaler.save') 
-    sample = scaler.transform(sample)
+    scaler = joblib.load('outputs/%s-scaler.save' % id)
+    df = scaler.transform(df)
 
+    # extract wanted features
+    features_df = read_csv('outputs/%s-features.csv' % id, header=None)
+    features_idx = features_df[1].values.flatten()
+    sample = df[:,features_idx]
+    print(features_df[0].values)
+    print(sample)
+
+    # forecast
+    model = load_model('outputs/%s-model.h5' % id)
     pred_probs = model.predict(sample)[0]
     pred_prob = np.amax(pred_probs)
     pred_idx = np.argmax(pred_probs, axis=-1)

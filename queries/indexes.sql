@@ -30,12 +30,12 @@ AND
     'market-index_DJI',
     'market-index_EURONEXT',
     'market-index_FTSE',
-    'market-index_GDAXI',
+    /* 'market-index_GDAXI', */
     /* issues to get opening prices on these from the daily job */     
     /* 'market-index_HANGSENG', */
     /* 'market-index_NIKKEI', */
-    'market-index_NYSE',
-    'market-index_OMX30',
+    /* 'market-index_NYSE', */
+    /* 'market-index_OMX30', */
     'market-index_SP500',
 
     # commodities index
@@ -73,9 +73,11 @@ AND
     # 'security_SE0000113250',
     # 'security_SE0000148884',
 
-    # currencies
-    # 'market-index_SEKUSD',
-    # 'market-index_GBPUSD'
+    # currencies */
+    /* 'market-index_SEKUSD', */
+    /* 'market-index_CNYUSD', */
+    /* 'market-index_JPYUSD', */
+    /* 'market-index_GBPUSD' */
   )
 )
 AND

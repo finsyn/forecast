@@ -1,0 +1,20 @@
+FROM gw000/keras:2.1.4-py3
+
+WORKDIR /opt/forecaster/ 
+
+RUN pip3 install \
+      pandas \
+      pandas-gbq \
+      google-cloud-pubsub \
+      sklearn
+
+ENV TF_CPP_MIN_LOG_LEVEL 2
+ENV GOOGLE_APPLICATION_CREDENTIALS /opt/forecaster/key.json
+
+COPY src ./src
+COPY queries ./queries
+COPY outputs ./outputs 
+
+EXPOSE 8080
+ENTRYPOINT ["python3"]
+CMD ["src/service.py"]

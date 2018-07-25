@@ -1,0 +1,10 @@
+FROM python 
+
+WORKDIR /opt/forecaster/ 
+
+RUN pip install \
+      pandas \
+      matplotlib \
+      sklearn
+
+ENTRYPOINT ["python"]
