@@ -1,29 +1,52 @@
-# OMX30 Index CFD forecasting
+# IG markets global index CFD daily forecasting
 
-An attempt to guess if OMX30 CFD:s will go up or down tomorrow based on historical patterns.
+An attempt to guess if any given global index CFD on IG Markets will go up or down tomorrow based on historical patterns.
 
 The model is based on the paper [Predicting the Direction of Stock Market Index Movement Using an Optimized Artificial Neural Network Model] by Mingyue Qiu and Yu Song but uses Keras built
 in stochastic gradient descent optimizer instead of the genetic algorithm based one used in the paper.
 
-The model uses a bunch of techinical analysis features from the index as input which is fed to small neural network. It outputs probabilities for OMX30 CFD:s going down or up the following day.
-
-Currently the biggest limitation is that we only have CFD data for one year.
+Input to the model consists of historical data from multiple global stock and commodity indexes. The raw data from each financial indicator is transformed into a bunch of techinical analysis features (moving averages etc.). The top X features are then selected programmatically based on their forecasting value. These chosen features are fed to small neural network that outputs probabilities for the target CFD:s going down or up the following day.
 
 ## Result
-The test sample that one year of data gives us is currently too small to draw any meaningful conclusions of the model's performance.
+The model is currently being used to conduct real trades of OMX30-SEK20 CFD:s on ig.com. I am still experimenting quite a lot and has changed model and pipeline quite frequently recently.
+
+Here is my financial "progress" so far:
+
+![monetary results](plots/cfd_OMX30-20SEK-HOUR-results.png "Real money being lost by the model")
 
 ## Usage
 My side project [Finsyn](https://app.finsyn.se) currently runs this on GAE in a opt-in alpha :)
 
 ![screenshot from finsyn](plots/demo.png "experimental usage")
 
-### IG CFD trading
-The model has been used to conduct real trades of OMX30-SEK20 CFD:s on ig.com.
+## Requirements
+ - Docker
+ - Docker Compose
+ - GCP service account private key file to access BigQuery tables
 
-Unfortunately I have noticed that the opening price I get on IG CFD on market opening
-doesn't match what is advertised by Yahoo Finance (which seems to match Nasdaq).
+## Development
+*currently only possible if you have received a GCP service account from me. Request one through [twitter DM](https://twitter.com/tornilssonohrn)*
 
-The intraday market direction of the CFD and the actual underlying index seems to be the same only about ~80% of the time the last year.
+Local runtime is powered by docker-compose. You need to set `TARGET` to one of the [targets](targets/). The available docker-compose services are:
+
+- **etl:** Extract, transform and load data from BigQuery to CSV files ready to feed to training
+- **train:** Automatic feature selection and training of model with some of the training samples set aside as test set for evaluation
+- **view:** Generates plots to understand the data. Outputs PNG:s to the [plots dir](plots/) 
+- **train-dist:** Trains the final model used for predictions. Now all the training samples are used since there is no more need for a test set.
+- **predict:** Run a prediction for tomorrow using the trained model 
+
+Example:
+```
+TARGET=omx docker-compose run etl
+```
+
+## Lessons learned
+Generally I've noticed quite a clash between theory and the real world. It seems possible to make predictions better than a cointoss but to actually make money out of those predictions is harder.
+
+Here are some problems I've encountered along the way:
+
+### 1. Underlying instrument vs IG CFD:s 
+Once I started letting a model trained on OMX30 data from Yahoo finance play with real money I noticed that the opening price I got on IG CFD on market opening didn't match what is advertised by Yahoo (which seems to match Nasdaq). The intraday market direction of the CFD and the actual underlying index seems to be the same only about ~80% of the time the last year.
 
 ```
 start = datetime(2017, 5, 29)
@@ -40,28 +63,8 @@ Opening prices during the same timespan differed about 4 points on average with 
 
 Altogether this made me move from trying to predict OMX30 to predicting the OMX30 CFD instead.
 
-## Requirements
- - Docker
- - Docker Compose
- - GCP service account private key file to access BigQuery tables
-
-## Development
-*currently only possible if you have received a GCP service account*
-
-### Extract Transform and Load data
-```
-docker-compose run etl
-```
-
-### Train network 
-```
-docker-compose run train
-```
-
-### Visualize features 
-```
-docker-compose run view
-```
+### 2. National holidays
+It's a mess (lunar calendar etc.) *To be further elaborated on*
 
 ## References
 
