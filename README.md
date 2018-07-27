@@ -1,32 +1,45 @@
-# IG markets global index CFD daily forecasting
+# Predicting tomorrows direction of index CFD:s
 
-An attempt to guess if any given global index CFD on IG Markets will go up or down tomorrow based on historical patterns.
+An attempt to predict if any given market index CFD on IG Markets will go up or down tomorrow based on historical patterns.
 
-The model is based on the paper [Predicting the Direction of Stock Market Index Movement Using an Optimized Artificial Neural Network Model] by Mingyue Qiu and Yu Song but uses Keras built
-in stochastic gradient descent optimizer instead of the genetic algorithm based one used in the paper.
+## Method 
 
-Input to the model consists of historical data from multiple global stock and commodity indexes. The raw data from each financial indicator is transformed into a bunch of techinical analysis features (moving averages etc.). The top X features are then selected programmatically based on their forecasting value. These chosen features are fed to small neural network that outputs probabilities for the target CFD:s going down or up the following day.
+Input to the model consists of historical data from multiple global stock and commodity indexes. The raw data from each financial indicator is transformed into a bunch of technical analysis features (moving averages etc.). These features are the same as the ones covered in the paper [Predicting the Direction of Stock Market Index Movement Using an Optimized Artificial Neural Network Model] by Mingyue Qiu and Yu Song. The top X among these features are then selected programmatically based on their forecasting value. These chosen features are fed to small neural network that outputs probabilities for the target CFD:s going up or down the following day.
 
 ## Result
+**This hasn't been peer reviewed in any way**
+
+### Sweden 30 CFD
+
+The currently best performing model had 67% accuracy on a test set of 84 samples/days (p-value < 0.05). The feature selection was done based on the whole train+test set though which might not be best practice. Still I think that > 60% accuracy should be possible with this kind of model judging by the results found in other articles.
+
+### Italy 40 CFD 
+*under construction*
+
+## Use cases
+
+### Trading 
 The model is currently being used to conduct real trades of OMX30-SEK20 CFD:s on ig.com. I am still experimenting quite a lot and has changed model and pipeline quite frequently recently.
 
 Here is my financial "progress" so far:
 
 ![monetary results](plots/cfd_OMX30-20SEK-HOUR-results.png "Real money being lost by the model")
 
-## Usage
-My side project [Finsyn](https://app.finsyn.se) currently runs this on GAE in a opt-in alpha :)
+The plan is to start trading with CFD:s for multiple markets simultaneously to offset the risk a bit.
+
+### Publishing
+My side project [Finsyn](https://app.finsyn.se) publishes daily prediction to a Messenger bot in an opt-in alpha channel :)
 
 ![screenshot from finsyn](plots/demo.png "experimental usage")
 
-## Requirements
+## Development
+
+### Requirements
  - Docker
  - Docker Compose
- - GCP service account private key file to access BigQuery tables
+ - GCP service account private key file to access BigQuery tables *Request one through [twitter DM](https://twitter.com/tornilssonohrn)*
 
-## Development
-*currently only possible if you have received a GCP service account from me. Request one through [twitter DM](https://twitter.com/tornilssonohrn)*
-
+### Run locally
 Local runtime is powered by docker-compose. You need to set `TARGET` to one of the [targets](targets/). The available docker-compose services are:
 
 - **etl:** Extract, transform and load data from BigQuery to CSV files ready to feed to training
@@ -64,7 +77,7 @@ Opening prices during the same timespan differed about 4 points on average with 
 Altogether this made me move from trying to predict OMX30 to predicting the OMX30 CFD instead.
 
 ### 2. National holidays
-It's a mess (lunar calendar etc.) *To be further elaborated on*
+I currently try to remove all data points from dates where the underlying market of the target CFD is closed. It's quite a hazzle to accurately mark holidays in some markets (lunar calendar etc.) *To be further elaborated on*
 
 ## References
 
