@@ -5,6 +5,7 @@ from sklearn import preprocessing
 from sklearn.externals import joblib
 import holidaysswe
 import holidayshk
+import holidaysit
 
 def read_data_csv(csvfile):
     df = read_csv(
@@ -66,7 +67,8 @@ def load_indicators(df):
 def get_trading_close_holidays(country_code):
     holidays = {
         'HK': holidayshk.get_trading_close_holidays,
-        'SE': holidaysswe.get_trading_close_holidays
+        'SE': holidaysswe.get_trading_close_holidays,
+        'IT': holidaysit.get_trading_close_holidays
     }
     return holidays[country_code](2018)
 
