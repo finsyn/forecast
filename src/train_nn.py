@@ -28,7 +28,7 @@ dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 2000
+n_epochs = 10000
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -66,8 +66,8 @@ def omxmodel (n_features, n_values):
 
     inputs = Input(shape=(n_features,))
 
-    X = Dense(units=6, activation='relu')(inputs)
-    X = Dense(units=3, activation='relu')(X)
+    X = Dense(units=n_features, activation='relu')(inputs)
+    X = Dense(units=4, activation='relu')(X)
     predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -94,7 +94,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y_oh,
-        epochs=n_epochs, batch_size=4,
+        epochs=n_epochs, batch_size=16,
         validation_data=(test_X, test_y_oh),
         shuffle=False)
 
