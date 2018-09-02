@@ -4,7 +4,7 @@ steps:
        'cp',
        '-r',
        # change this once a new, hopefully better model has been trained 
-       'gs://finsyn-ml-data/2018-07-29/*',
+       'gs://finsyn-ml-data/2018-09-02/*',
        './'
        ]
   - name: 'gcr.io/cloud-builders/docker'

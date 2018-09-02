@@ -1,6 +1,6 @@
 from pandas import datetime, bdate_range, offsets, concat, read_csv
 from extract import query
-from load import load_indicators, load_target, get_trading_close_holidays
+from load import load_indicators, get_trading_close_holidays
 import numpy as np
 from keras.models import load_model
 from datetime import datetime, timedelta 

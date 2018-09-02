@@ -22,13 +22,13 @@ from sklearn.metrics import confusion_matrix
 
 id = environ['TARGET_CFD_ID']
 n_top_features = int(environ['TRAIN_FEATURES'])
-train_split = float(getenv('TRAIN_RATIO', 0.7))
+train_split = float(getenv('TRAIN_RATIO', 0.8))
 
 dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 10000
+n_epochs = 5000
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -66,8 +66,7 @@ def omxmodel (n_features, n_values):
 
     inputs = Input(shape=(n_features,))
 
-    X = Dense(units=n_features, activation='relu')(inputs)
-    X = Dense(units=4, activation='relu')(X)
+    X = Dense(units=n_features/2, activation='relu')(inputs)
     predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -82,8 +81,8 @@ model = omxmodel(n_features, n_output)
 
 print(model.summary())
 
-optimizer = SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=True)
-optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+# optimizer = SGD(lr=0.01, momentum=0.1, decay=0.0, nesterov=False)
+optimizer = Adam(lr=0.001, beta_1=0.1, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 # build network
 model.compile(
@@ -94,7 +93,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y_oh,
-        epochs=n_epochs, batch_size=16,
+        epochs=n_epochs, batch_size=32,
         validation_data=(test_X, test_y_oh),
         shuffle=False)
 

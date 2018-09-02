@@ -30,7 +30,7 @@ AND
     'market-index_DJI',
     'market-index_EURONEXT',
     'market-index_FTSE',
-    /* 'market-index_GDAXI', */
+    'market-index_GDAXI',
     /* issues to get opening prices on these from the daily job */     
     /* 'market-index_HANGSENG', */
     /* 'market-index_NIKKEI', */

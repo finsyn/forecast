@@ -17,9 +17,9 @@ def read_data_csv(csvfile):
     return df
 
 # Target label
-def load_target(df):
+def load_binary(df, colname):
     o = DataFrame()
-    o['target'] = (rlog(df['c'],df['o']) > 0.0).astype(int)
+    o[colname] = (rlog(df['c'],df['o']) > 0.0).astype(int)
     o.index.name = 'date'
     return o
 
@@ -38,8 +38,6 @@ def load_indicators(df):
         c = data['c']
 
         o = DataFrame()
-        # o['ma5'] = ma(5, c)
-        # o['ma12'] = ma(12, c)
         o['bias6'] = (c - ma(6, c)) / ma(6, c)
         o['psy12'] = psy(12, c)
         o['asy5'] = asy(5, c)
@@ -91,7 +89,7 @@ def load_features(service_id, country_code, date_from, date_to):
         df = load_indicators(df_raw)
         df_features.append(df)
 
-    df_target = load_target(read_data_csv(target_data_file))
+    df_target = load_binary(read_data_csv(target_data_file), 'target')
 
     # join features and target dfs
     df = concat(df_features + [df_target], axis=1, join='outer')
