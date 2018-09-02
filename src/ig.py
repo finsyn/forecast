@@ -5,6 +5,7 @@ mp.use('Agg')
 import matplotlib.pyplot as plt
 from pandas import isnull, datetime, bdate_range, read_csv, read_json, concat, to_datetime, DataFrame, offsets
 import numpy as np
+import re
 from os import environ
 
 # actual opening price
@@ -14,7 +15,7 @@ df = read_csv(
     index_col=0,
     converters={
         'PL Amount': lambda x: float(x.replace(',', '')),
-        'Size': lambda x: float(x.replace('-', '0')),
+        'Size': lambda x: float(re.sub(r"^-$", '0', x)),
         'Open level': lambda x: float(x.replace('-', '0'))
     },
     usecols=['Date', 'Transaction type', 'Open level', 'Size', 'PL Amount'])
