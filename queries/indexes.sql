@@ -35,7 +35,7 @@ AND
     /* 'market-index_HANGSENG', */
     /* 'market-index_NIKKEI', */
     /* 'market-index_NYSE', */
-    /* 'market-index_OMX30', */
+    'market-index_OMX30',
     'market-index_SP500',
 
     # commodities index

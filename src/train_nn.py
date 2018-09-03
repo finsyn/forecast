@@ -28,7 +28,7 @@ dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 5000
+n_epochs = 10000
 target = 'target'
 
 print('n_features: %s ' % n_features)
