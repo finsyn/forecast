@@ -20,17 +20,21 @@ def forecast(id, cc, cfd_opt):
     # remove dates when STO is closed
     # up until yesterday since that is the last day from which
     # we have all data
+    # get 5 periods so we have something to interpolate between in case
+    # of missing values due to e.g US market close
     index_range = bdate_range(
                 end=datetime.now().date() - timedelta(1),
-                periods=1,
+                periods=5,
                 freq='C',
                 holidays=get_trading_close_holidays(cc)
                 )
-
     print(index_range)
     df = df.reindex(index_range)
 
+    # after interpolation we only need one lag
     df = df.interpolate(limit_direction='both')
+    df = df.tail(1)
+    print(df)
 
     # normalize values
     scaler = joblib.load('outputs/%s-scaler.save' % id)
