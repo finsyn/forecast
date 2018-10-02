@@ -1,3 +1,6 @@
+from pandas import DataFrame
+import numpy as np
+
 def load_shorts(df):
     print('loading short positions for %s days' % len(df))
     securities = list(set(df['id'].values))
@@ -21,9 +24,14 @@ def load_shorts(df):
 
 def load_calendar_events(df):
     # a column for market opening awareness 
+    # last two years omx30-20sek on IG seems to have different
+    # behaviour on mondays and fridays
     o = DataFrame()
-    o['isMonday'] = (df.index.weekday == 0).astype(int)
-    o['isFriday'] = (df.index.weekday == 4).astype(int)
+    print(df.index.weekday)
+    o['isMondayOrFriday'] = np.any([
+        df.index.weekday == 0,
+        df.index.weekday == 4
+    ], axis=0).astype(int)
     o.index = df.index
 
     return o

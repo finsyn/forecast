@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import json
+import time
 from forecaster import forecast
 from os import environ
 from datetime import datetime
-from google.cloud import pubsub
+from google.cloud import pubsub_v1
+
+# Read more over at
+# https://cloud.google.com/pubsub/docs/publisher#pubsub-publish-message-python
 
 id = environ['TARGET_CFD_ID']
 service_id = environ['TARGET_SERVICE_ID']
@@ -19,11 +23,27 @@ cfd_opt = {
     'time_to': environ['TIME_TO']
 }
 
+def callback(message_future):
+    # When timeout is unspecified, the exception method waits indefinitely.
+    if message_future.exception(timeout=30):
+       print('[forecaster] Publishing message on {} threw an Exception {}.'.format(
+            topic_name, message_future.exception()))
+    else:
+        print('[forecaster] Published message: {}'.format(
+            message_future.result()
+        ))
+
+def publish_message(data, topic_name, project_id):
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project_id, topic_name)
+    message_future = publisher.publish(
+        topic_path, data=data.encode('utf-8')
+    )
+    message_future.add_done_callback(callback)
+
+
 # TODO: have an editor listen to prediction events instead
 def publish_story(direction, probability, id, project_id):
-    publisher = pubsub.PublisherClient()
-
-    topic = 'projects/%s/topics/publication-new' % project_id
 
     emojis = {
         'UP': '☀️',
@@ -52,12 +72,10 @@ def publish_story(direction, probability, id, project_id):
     }
 
     data = json.dumps(payload)
-    publisher.publish(topic, data.encode())
+    publish_message(data, 'publication-new', project_id)
+
 
 def publish_prediction(direction, probability, service_id, project_id):
-    publisher = pubsub.PublisherClient()
-
-    topic = 'projects/%s/topics/market.prediction' % project_id
 
     values = {
         'UP': 1,
@@ -73,11 +91,8 @@ def publish_prediction(direction, probability, service_id, project_id):
         'period': 'B'
     }
     data = json.dumps(payload)
-    publisher.publish(
-        topic, data.encode()
-    )
-
-
+    publish_message(data, 'market-prediction', project_id)
+    
 (pred_direction, pred_prob) = forecast(id, cc, cfd_opt)
 
 print(
