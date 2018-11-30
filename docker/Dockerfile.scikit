@@ -5,6 +5,7 @@ WORKDIR /opt/forecaster/
 RUN pip install \
       pandas \
       sklearn \
-      scipy
+      scipy \
+      joblib
 
 ENTRYPOINT ["python"]

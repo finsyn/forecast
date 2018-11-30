@@ -67,7 +67,8 @@ def omxmodel (n_features, n_values):
     inputs = Input(shape=(n_features,))
 
     # X = Dense(units=n_features, activation='relu')(inputs)
-    predictions = Dense(n_values, activation='softmax')(inputs)
+    X = Dense(n_features, activation='relu')(inputs)
+    predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
 

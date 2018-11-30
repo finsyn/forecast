@@ -1,135 +1,58 @@
 import numpy as np
-import pandas as pd
+from pandas import read_csv, TimeGrouper, concat
+from joblib import load
 import copy
-from load import load_quotes_daily, read_data_csv
-from sweholidays import get_trading_close_holidays
-from matplotlib import pyplot
+from os import environ, getenv
+# from sweholidays import get_trading_close_holidays
 
-leverage_long = 1
-leverage_ava = 8
-leverage_ig = 10
-ig_stop_limit = 5
+# args
+id = environ['TARGET_CFD_ID']
+id_backtest = environ['BACKTEST_CFD_ID']
 
-cap_init = 1500
+# config
+leverage_ig = 20
+ig_stop_limit = 6 
+cap_init = 6000
 
-res = np.genfromtxt('data/test-output.csv', delimiter=',')
-y_h = res[0]
+# load persisted setup
+features_df = read_csv('outputs/%s-features.csv' % id, header=None)
+features_idx = features_df[1].values.flatten()
+model = load('model-rf.joblib')
 
-n_lags = len(y_h)
-df = read_data_csv('data/cfds.csv')
+def predict(df):
+    sample = df.values[features_idx]
+    df['prediction'] = model.predict_proba([sample])
 
-o = pd.DataFrame()
-c = df.loc[df['id'] == 'cfd_OMX30-20SEK-HOUR']
-
-o['diff'] = c.c - c.o
-o['close'] = c.c
-o['open'] = c.o
-o['low'] = c.l
-o['high'] = c.h
-o['change'] = (c.c - c.o)/c.o
-
-# remove dates when STO is closed
-index_range = pd.bdate_range(
-            end=pd.datetime(2018, 6, 10),
-            periods=n_lags,
-            freq='C',
-            holidays=get_trading_close_holidays(2018)
-            )
-
-o = o.reindex(index_range)
-
-o = o.interpolate(limit_direction='both')
-o = o.tail(n_lags)
-
-change_hist = o['change'].values
-diffs_hist = o['diff'].values
-close_hist = o['close'].values
-opens_hist = o['open'].values
-lows_hist = o['low'].values
-highs_hist = o['high'].values
-pred_up_hist = y_h.astype(bool)
-
-# history of previous bdays closing and current day
-diffs_c2c_hist = [0]
-for i in range(1, len(close_hist)):
-    diffs_c2c_hist.append(close_hist[i] - close_hist[i-1])
-diffs_c2c_hist = np.array(diffs_c2c_hist)
-
-def run_ava(cap_init, changes, predictions, leverage):
-    cap_hist = [cap_init]
-    cap = cap_init
-    for i in range(0, n_lags):
-        multiplier = leverage if predictions[i] else -1 * leverage
-        cap *= 1 + multiplier * changes[i]
-        # product fee
-        cap *= 1 - 0.0006
-        # spread fee
-        cap *= 1 - 0.0012
-        cap_hist.append(cap.copy())
-    return cap_hist
-
-def run_ig(cap_init, diffs, opens, lows, highs, predictions, leverage, stop_limit):
-    cap_hist = [cap_init]
-    cap = cap_init
-    for i in range(0, n_lags):
-        pred = predictions[i]
-        multiplier = leverage if pred else -1 * leverage
-        # stop limit
-        if (
-            (opens[i] - lows[i] > stop_limit and pred) or
-            (highs[i] - opens[i] > stop_limit and not pred)
-        ):
-            cap -= leverage * stop_limit
-            # stop loss fee
-            cap -= leverage * 0.8
-        else:
-            cap += multiplier * diffs[i]
-
-        # spread fee
-        cap -= leverage * 0.5
-        cap_hist.append(copy.copy(cap))
-    return cap_hist
-
-
-def run_long(cap_init, closes, leverage):
-    cap_hist = [cap_init]
-    cap = cap_init
-    cap_hist.append(cap)
-    for i in range(1, n_lags):
-        cap *= 1 + (closes[i]/closes[i-1] - 1) * leverage
-        cap_hist.append(cap.copy())
-    return cap_hist
-
-cap_hist_safe = run_long(cap_init, close_hist, leverage_long)
-cap_hist_ava = run_ava(cap_init, change_hist, pred_up_hist, leverage_ava)
-cap_hist_ig = run_ig(
-    cap_init,
-    diffs_hist,
-    opens_hist,
-    lows_hist,
-    highs_hist,
-    pred_up_hist,
-    leverage_ig,
-    ig_stop_limit
+feat = read_csv(
+    'data/%s-feat.csv' % id,
+    header=0,
+    index_col=0,
+    parse_dates=True
 )
+quote = read_csv(
+    'data/%s-backtest.csv' % id_backtest,
+    header=0,
+    index_col=0,
+    parse_dates=True
+)
+feat['probdown'] = model.predict_proba(feat.values[:,features_idx])[:,0]
 
-label_ava = 'BULL/BEAR AVA X%s' % leverage_ava
-label_ig = 'IG Sverige30 Cash CFD %s SEK/point stop-limit: %s' % (leverage_ig, ig_stop_limit)
-label_long = 'Benchmark: AVANZA zero without forecast'
+def dayReturn(day):
+    if day.empty: return None
+    date = day.index.date[0]
+    prediction = feat.loc[date]['probdown']
+    startprice = day.iloc[0]['open'] 
+    for index, row in day.iterrows():
+        if (prediction > 0.5 and row['low'] < startprice - ig_stop_limit):
+            return - leverage_ig * (ig_stop_limit + 0.8)
+        if (prediction <= 0.5 and row['high'] > startprice + ig_stop_limit):
+            return - leverage_ig * (ig_stop_limit + 0.8)
+    sign = -1 if (prediction > 0.5) else 1
+    return (startprice - day.iloc[-1]['open']) * leverage_ig * sign
 
-x = range(0, n_lags+1)
-pyplot.plot(x, cap_hist_ava, 'g-', label=label_ava)
-pyplot.plot(x, cap_hist_ig, 'r-', label=label_ig)
-pyplot.plot(x, cap_hist_safe, 'b-', label=label_long)
+returns = (quote
+           .groupby(TimeGrouper('D'))
+           .apply(dayReturn))
 
-# pyplot.plot(x, abs(diffs_hist))
-# pyplot.plot(x, highs_hist-lows_hist)
-# pyplot.hist(abs(diffs_hist),normed=True)
-# median_diff = abs(diffs_hist)[len(diffs_hist)/2]
-# median_highlowdiff = (highs_hist-lows_hist)[len(diffs_hist)/2]
-
-pyplot.title('Using forecast for daily long/short positions (fees included)')
-pyplot.xlabel('Business days')
-pyplot.ylabel('SEK')
-pyplot.legend()
-pyplot.show()
+print(returns)
+print(returns.sum())

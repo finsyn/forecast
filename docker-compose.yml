@@ -8,12 +8,20 @@ services:
     command: src/etl.py
     volumes:
       - ./:/opt/forecaster/
-  train-svm:
+  train-rf:
     build: 
       dockerfile: docker/Dockerfile.scikit
       context: .
     env_file: ./targets/${TARGET}.env
-    command: src/train_svm.py
+    command: src/train_rf.py
+    volumes:
+      - ./:/opt/forecaster/
+  backtest:
+    build: 
+      dockerfile: docker/Dockerfile.scikit
+      context: .
+    env_file: ./targets/${TARGET}.env
+    command: src/backtest.py
     volumes:
       - ./:/opt/forecaster/
   train:

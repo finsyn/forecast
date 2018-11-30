@@ -54,24 +54,25 @@ AND
     # not enough historical real estate data available
     # 'market-index_XLRE'
 
-     /* 'security_SE0000869646', */
-     /* 'security_SE0000106270', */
-     /* 'security_CH0012221716', */
-     /* 'security_SE0000695876', */
-     /* 'security_SE0007100581', */
-     /* 'security_GB0009895292', */
-     /* 'security_SE0000108656', */
-     /* 'security_SE0008374250', */
-     /* 'security_SE0000667891', */
-     /* 'security_SE0001785197', */
-     /* 'security_SE0000115446', */
-     /* 'security_SE0000310336', */
-     /* 'security_SE0007100599', */
-     /* 'security_SE0000242455', */
-     /* 'security_SE0000171100', */
-     /* 'security_SE0000108227', */
-     /* 'security_SE0000113250', */
-     /* 'security_SE0000148884' */
+    ,
+     'security_SE0000869646',
+     'security_SE0000106270',
+     'security_CH0012221716',
+     'security_SE0000695876',
+     'security_SE0007100581',
+     'security_GB0009895292',
+     'security_SE0000108656',
+     'security_SE0008374250',
+     'security_SE0000667891',
+     'security_SE0001785197',
+     'security_SE0000115446',
+     'security_SE0000310336',
+     'security_SE0007100599',
+     'security_SE0000242455',
+     'security_SE0000171100',
+     'security_SE0000108227',
+     'security_SE0000113250',
+     'security_SE0000148884'
 
     # currencies */
     /* 'market-index_SEKUSD', */

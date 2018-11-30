@@ -47,6 +47,7 @@ res['openGoodDiff'] = (res['o'] - res['Open level']) * res['Size']
 res['dayDiff'] = abs(res['c'] - res['o'])
 res['diff'] = res['o'] - res['Open level']
 res['mon'] = res['PL Amount']
+res['revenue'] = res[res['PL Amount'] > 0]['PL Amount']
 res['sum'] = res['PL Amount'].cumsum()
 
 # cleanup
