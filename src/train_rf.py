@@ -57,6 +57,10 @@ pred_y_prob = clf.predict_proba(test_X)
 conf_idx = np.any(pred_y_prob > 0.65, axis=1)
 p = binom_test(np.sum(test_y == pred_y), len(test_y))
 
+# print outcomes
+print(dataset)
+print(test_y)
+print(pred_y)
 # Get accuracy on test set
 score = accuracy_score(test_y, pred_y) 
 score_conf = accuracy_score(test_y[conf_idx], pred_y[conf_idx]) 

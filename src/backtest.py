@@ -10,8 +10,9 @@ id = environ['TARGET_CFD_ID']
 id_backtest = environ['BACKTEST_CFD_ID']
 
 # config
-leverage_ig = 20
+leverage_ig = 10
 ig_stop_limit = 6 
+ig_win_limit = 10 
 cap_init = 6000
 
 # load persisted setup
@@ -35,20 +36,34 @@ quote = read_csv(
     index_col=0,
     parse_dates=True
 )
-feat['probdown'] = model.predict_proba(feat.values[:,features_idx])[:,0]
+feat['probdown'] = model.predict(feat.values[:,features_idx])
+print(feat[(feat["probdown"] == True) & (feat["target"] == 1)])
+print(feat[(feat["probdown"] == False) & (feat["target"] == 0)])
 
 def dayReturn(day):
-    if day.empty: return None
+    if day.empty: return 0
     date = day.index.date[0]
-    prediction = feat.loc[date]['probdown']
+    pdown = feat.loc[date]['probdown']
     startprice = day.iloc[0]['open'] 
+    # we always pay the spread
+    dr = - leverage_ig * 0.5
     for index, row in day.iterrows():
-        if (prediction > 0.5 and row['low'] < startprice - ig_stop_limit):
-            return - leverage_ig * (ig_stop_limit + 0.8)
-        if (prediction <= 0.5 and row['high'] > startprice + ig_stop_limit):
-            return - leverage_ig * (ig_stop_limit + 0.8)
-    sign = -1 if (prediction > 0.5) else 1
-    return (startprice - day.iloc[-1]['open']) * leverage_ig * sign
+        if (
+               (pdown < 0.5 and (row['low'] < startprice - ig_stop_limit)) or
+               (pdown >= 0.5 and (row['high'] > startprice + ig_stop_limit))
+        ):
+            print('stoploss', index, pdown, row['low'], startprice)
+            loss = dr - leverage_ig * (ig_stop_limit + 0.8)
+            # keep on betting
+            return loss + dayReturn(day[day.index > index]) 
+        if (
+            (pdown < 0.5 and row['open'] > startprice + ig_win_limit) or
+            (pdown >= 0.5 and row['open'] < startprice - ig_win_limit)
+        ):
+            win = dr + leverage_ig * ig_win_limit
+            return win + dayReturn(day[day.index > index]) 
+    sign = 1 if pdown > 0.5 else -1
+    return dr + (startprice - day.iloc[-1]['open']) * leverage_ig * sign
 
 returns = (quote
            .groupby(TimeGrouper('D'))
@@ -56,3 +71,4 @@ returns = (quote
 
 print(returns)
 print(returns.sum())
+print(returns.max())
