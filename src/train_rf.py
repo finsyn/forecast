@@ -44,11 +44,11 @@ test_X, test_y = X[n_train:,:], Y[n_train:]
 
 # train model
 clf = RandomForestClassifier(
-    n_estimators=300,
-    # min_samples_split=50,
+    n_estimators=500,
+    # min_samples_split=5,
     criterion='gini',
     class_weight='balanced',
-    max_depth=3
+    max_depth=9
 )
 clf.fit(train_X, train_y)
 

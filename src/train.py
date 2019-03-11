@@ -4,6 +4,7 @@ from pandas import read_csv
 from scipy.stats import binom_test
 from performance import confident_precision
 from parse import get_train_data
+from os import environ, getenv
 
 # np.random.seed(1337)
 
@@ -14,17 +15,22 @@ from keras.utils import to_categorical
 from keras.optimizers import Adam
 from keras.backend import argmax
 
-from matplotlib import pyplot
+# from matplotlib import pyplot
 
 from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
 
-dataset = read_csv('data/training.csv', header=0, index_col=0)
+id = environ['TARGET_CFD_ID']
+n_top_features = int(getenv('TRAIN_FEATURES', 15))
+train_split = float(getenv('TRAIN_RATIO', 0.7))
+
+dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
+values = dataset.values
 
 n_features = dataset.shape[1]
-n_lags = 8
+n_lags = 1
 n_output = 2
-n_epochs = 1000
+n_epochs = 100
 train_split = 0.7
 target = 'target'
 
@@ -60,11 +66,11 @@ def omxmodel (n_inputs, n_features, n_values):
 
     inputs = Input(shape=(n_inputs, n_features))
 
-    # X = LSTM(16, return_sequences=True)(inputs)
+    X = LSTM(16, return_sequences=True)(inputs)
     # X = Dropout(0.5)(X)
-    X = LSTM(1)(inputs)
+    X = LSTM(64)(inputs)
     # X = Dropout(0.5)(X)
-    # X = Dense(units=8, activation='relu')(X)
+    X = Dense(units=8, activation='relu')(X)
     # X = Dropout(0.5)(X)
     predictions = Dense(n_values, activation='softmax')(X)
 
@@ -102,11 +108,11 @@ if result:
 model.save('model.h5')
 
 # plot history
-pyplot.figure()
-pyplot.subplot(2, 1, 1)
-pyplot.plot(history.history['loss'], label='train')
-pyplot.plot(history.history['val_loss'], label='test')
-pyplot.legend()
+# pyplot.figure()
+# pyplot.subplot(2, 1, 1)
+# pyplot.plot(history.history['loss'], label='train')
+# pyplot.plot(history.history['val_loss'], label='test')
+# pyplot.legend()
 
 test_y_prob = model.predict(test_X)
 
@@ -141,4 +147,4 @@ print('Test set confident accuracy: %s' % acc_confident)
 print(confusion_matrix(test_y_conf_real, test_y_conf_pred))
 print('Test set confident p-value: %s' % p_val_confident)
 
-pyplot.show()
+# pyplot.show()

@@ -2,9 +2,9 @@ SELECT
   TIMESTAMP_TRUNC(openQuotes.date, DAY) AS date,
   openQuotes.service_id as id,
   closeQuotes.newestClose as c,
-  openQuotes.newestOpen as o,
-  max(extremeQuotes.newestHighest) as h,
-  min(extremeQuotes.newestLowest) as l
+  openQuotes.newestOpen as o
+  /* max(extremeQuotes.newestHighest) as h, */
+  /* min(extremeQuotes.newestLowest) as l */
 FROM
 (
   SELECT
@@ -27,21 +27,21 @@ INNER JOIN (
 ) closeQuotes
 on format_timestamp("%F", closeQuotes.date) = format_timestamp("%F", openQuotes.date)
 
-INNER JOIN (
-  SELECT
-  first_value(high) over (partition by service_id, date order by created_at desc) as newestHighest,
-  first_value(low) over (partition by service_id, date order by created_at desc) as newestLowest,
-  *
-  FROM `notifications.quotes`
-  WHERE format_timestamp("%H:%M", date, "{timezone}") >= '{time_from}'
-  AND   format_timestamp("%H:%M", date, "{timezone}") <= '{time_to}'
-  AND service_id = '{service_id}'
-) extremeQuotes
-on format_timestamp("%F", closeQuotes.date) = format_timestamp("%F", extremeQuotes.date)
+/* INNER JOIN ( */
+/*   SELECT */
+/*   first_value(high) over (partition by service_id, date order by created_at desc) as newestHighest, */
+/*   first_value(low) over (partition by service_id, date order by created_at desc) as newestLowest, */
+/*   * */
+/*   FROM `notifications.quotes` */
+/*   WHERE format_timestamp("%H:%M", date, "{timezone}") >= '{time_from}' */
+/*   AND   format_timestamp("%H:%M", date, "{timezone}") <= '{time_to}' */
+/*   AND service_id = '{service_id}' */
+/* ) extremeQuotes */
+/* on format_timestamp("%F", closeQuotes.date) = format_timestamp("%F", extremeQuotes.date) */
 
-WHERE
- /* missing this for some NIKKEI days */
- extremeQuotes.newestLowest > 0.0
+/* WHERE */
+/*  /1* missing this for some NIKKEI days *1/ */
+/*  extremeQuotes.newestLowest > 0.0 */
 GROUP BY
   date,
   id,

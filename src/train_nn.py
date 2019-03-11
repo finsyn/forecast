@@ -28,7 +28,7 @@ dataset = read_csv('data/%s-feat.csv' % id, header=0, index_col=0)
 
 n_features = dataset.shape[1]-1
 n_output = 2
-n_epochs = 5000
+n_epochs = 10000
 target = 'target'
 
 print('n_features: %s ' % n_features)
@@ -66,8 +66,8 @@ def omxmodel (n_features, n_values):
 
     inputs = Input(shape=(n_features,))
 
-    # X = Dense(units=n_features, activation='relu')(inputs)
-    X = Dense(n_features, activation='relu')(inputs)
+    X = Dense(units=n_features*2, activation='relu')(inputs)
+    X = Dense(n_features/2, activation='relu')(X)
     predictions = Dense(n_values, activation='softmax')(X)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -82,10 +82,17 @@ model = omxmodel(n_features, n_output)
 
 print(model.summary())
 
-# optimizer = SGD(lr=0.1, momentum=0.1, decay=0.001, nesterov=False)
+optimizer = SGD(lr=0.1, momentum=0.1, decay=0.001, nesterov=False)
 # ADAM params based on most common values mentioned in
 # https://machinelearningmastery.com/adam-optimization-algorithm-for-deep-learning/
-optimizer = Adam(lr=0.01, beta_1=0.99, beta_2=0.999, epsilon=1e-8, decay=0.0, amsgrad=False)
+# optimizer = Adam(
+    # lr=0.001,
+    # beta_1=0.99,
+    # beta_2=0.999,
+    # epsilon=1e-8,
+    # decay=0.0,
+    # amsgrad=False
+# )
 
 # build network
 model.compile(
@@ -96,7 +103,7 @@ model.compile(
 # fit network
 history = model.fit(
         train_X, train_y_oh,
-        epochs=n_epochs, batch_size=32,
+        epochs=n_epochs, batch_size=64,
         validation_data=(test_X, test_y_oh),
         verbose=1,
         shuffle=False)

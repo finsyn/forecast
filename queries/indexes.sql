@@ -36,10 +36,10 @@ AND
     /* 'market-index_NIKKEI', */
     /* 'market-index_NYSE', */
     'market-index_OMX30',
-    'market-index_SP500',
+    /* 'market-index_SP500', */
 
     # commodities index
-    'market-index_USCI',
+    /* 'market-index_USCI', */
     # volatility index
     'market-index_VIX',
     # some branch indexes
@@ -50,11 +50,11 @@ AND
     'market-index_XLK',
     'market-index_XLU',
     'market-index_XLV',
-    'market-index_XLP'
+    'market-index_XLP',
     # not enough historical real estate data available
     # 'market-index_XLRE'
 
-    ,
+    /* , */
      'security_SE0000869646',
      'security_SE0000106270',
      'security_CH0012221716',
@@ -72,13 +72,13 @@ AND
      'security_SE0000171100',
      'security_SE0000108227',
      'security_SE0000113250',
-     'security_SE0000148884'
+     'security_SE0000148884',
 
     # currencies */
-    /* 'market-index_SEKUSD', */
-    /* 'market-index_CNYUSD', */
-    /* 'market-index_JPYUSD', */
-    /* 'market-index_GBPUSD' */
+    'market-index_SEKUSD',
+    'market-index_CNYUSD',
+    'market-index_JPYUSD',
+    'market-index_GBPUSD'
   )
 )
 AND

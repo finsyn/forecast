@@ -48,9 +48,9 @@ def load_indicators(df):
 
         # homemade volatility feature
         # high/low not always available in dataset
-        if ('h' in data.columns):
-            h = data['h']
-            l = data['l']
+        # if ('h' in data.columns):
+        #     h = data['h']
+        #     l = data['l']
             # o['ma5hl'] = rlog(l, h)
 
         cols.append(o)
