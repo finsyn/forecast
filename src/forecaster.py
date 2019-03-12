@@ -1,4 +1,4 @@
-from pandas import datetime, bdate_range, offsets, concat, read_csv
+from pandas import datetime, bdate_range, offsets, concat, read_csv, set_option
 from extract import query
 from load import load_indicators, get_trading_close_holidays
 import numpy as np
@@ -6,6 +6,8 @@ from keras.models import load_model
 from datetime import datetime, timedelta 
 from sklearn import preprocessing
 from sklearn.externals import joblib
+
+set_option('display.max_columns', 500)
 
 def forecast(id, cc, cfd_opt):
 

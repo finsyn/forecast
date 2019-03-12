@@ -72,13 +72,13 @@ AND
      'security_SE0000171100',
      'security_SE0000108227',
      'security_SE0000113250',
-     'security_SE0000148884',
+     'security_SE0000148884'
 
     # currencies */
-    'market-index_SEKUSD',
-    'market-index_CNYUSD',
-    'market-index_JPYUSD',
-    'market-index_GBPUSD'
+    /* 'market-index_SEKUSD', */
+    /* 'market-index_CNYUSD', */
+    /* 'market-index_JPYUSD', */
+    /* 'market-index_GBPUSD' */
   )
 )
 AND
